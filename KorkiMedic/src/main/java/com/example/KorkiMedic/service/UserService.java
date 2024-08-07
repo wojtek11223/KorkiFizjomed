@@ -1,11 +1,13 @@
 package com.example.KorkiMedic.service;
 
 import com.example.KorkiMedic.entity.User;
+import com.example.KorkiMedic.enums.Role;
 import com.example.KorkiMedic.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -21,5 +23,15 @@ public class UserService {
         userRepository.findAll().forEach(users::add);
 
         return users;
+    }
+
+    public boolean isUserDoctor(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        return userOptional.isPresent() && userOptional.get().getRoles().contains(Role.DOCTOR);
+    }
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 }

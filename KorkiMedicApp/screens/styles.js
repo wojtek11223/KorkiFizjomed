@@ -47,3 +47,33 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+export const datePicker = StyleSheet.create({
+  datePickerButton: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  datePickerButtonText: {
+    color: '#333',
+    fontSize: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+});
+
+export const errorStyles = StyleSheet.create({
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 5,
+  },
+});

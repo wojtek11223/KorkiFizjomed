@@ -13,30 +13,24 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoyaltyPoint {
+public class UserPointAction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private User patient;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    private Integer points;
-    private String reason;
+    @ManyToOne
+    @JoinColumn(name = "point_action_id")
+    private PointAction pointAction;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private LocalDateTime actionDate;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        actionDate = LocalDateTime.now();
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    // Getters and setters
 }

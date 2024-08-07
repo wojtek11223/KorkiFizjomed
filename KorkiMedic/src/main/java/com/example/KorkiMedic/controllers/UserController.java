@@ -5,6 +5,7 @@ import com.example.KorkiMedic.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RequestMapping("/users")
 @RestController
+@CrossOrigin("http://192.168.0.101:8081")
 public class UserController {
     private final UserService userService;
 

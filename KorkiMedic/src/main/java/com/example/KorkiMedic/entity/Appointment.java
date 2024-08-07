@@ -14,6 +14,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"patient_id", "doctor_id", "date"})
+})
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +26,18 @@ public class Appointment {
     @JoinColumn(name = "patient_id")
     private User patient;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private User doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "service_id")
+    private Service service;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
     private String description;
-
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -41,5 +51,4 @@ public class Appointment {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }

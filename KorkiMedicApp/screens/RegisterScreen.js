@@ -1,26 +1,83 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { globalStyles } from './styles';
-import { Button, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { globalStyles, datePicker, errorStyles } from './styles';
 
 export default function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setFirstLast] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [birthDate, setBirthDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-   // setShow(Platform.OS === 'ios');
+    const currentDate = selectedDate || birthDate;
+    setShow(Platform.OS === 'ios');
     setBirthDate(currentDate);
   };
 
   const showDatepicker = () => {
     setShow(true);
   };
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('pl-PL', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const validateForm = () => {
+    let formErrors = {};
+    if (!email) {
+      formErrors.email = 'Email jest wymagany';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      formErrors.email = 'Nieprawidłowy format email';
+    }
+    if (!password) {
+      formErrors.password = 'Hasło jest wymagane';
+    } else if (password !== confirmPassword) {
+      formErrors.confirmPassword = 'Hasła muszą się zgadzać';
+    }
+    return formErrors;
+  };
+
+  const handleSubmit = async () => {
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length === 0) {
+      // Submit form
+      console.log('Form is valid');
+      try {
+        const response = await fetch('http://your-api-url/api/password/reset-request', {
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber,
+            dateOfBirth: birthDate
+        });
+        const data = await response.json();
+        Alert.alert('Reset Link Sent', data.message);
+    } catch (error) {
+        Alert.alert('Error', 'Failed to send reset link');
+    }
+    } else {
+      setErrors(formErrors);
+    }
+  };
+
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Zarejestruj się</Text>
@@ -29,14 +86,14 @@ export default function RegisterScreen({ navigation }) {
         placeholder="Imię"
         autoCapitalize="none"
         value={firstName}
-        onChangeText={setFirstName} 
+        onChangeText={setFirstName}
       />
       <TextInput
         style={globalStyles.input}
         placeholder="Nazwisko"
         value={lastName}
         autoCapitalize="none"
-        onChangeText={setFirstLast} 
+        onChangeText={setFirstLast}
       />
       <TextInput
         style={globalStyles.input}
@@ -44,10 +101,21 @@ export default function RegisterScreen({ navigation }) {
         value={email}
         keyboardType="email-address"
         autoCapitalize="none"
-        onChangeText={setEmail} 
+        onChangeText={setEmail}
       />
-      <Button onPress={showDatepicker} title="Show date picker!" />
-      <Text style={{ marginTop: 20 }}>{date.toDateString()}</Text>
+      <TextInput
+        style={globalStyles.input}
+        placeholder="Telefon"
+        value={phoneNumber}
+        keyboardType="name-phone-pad"
+        autoCapitalize="none"
+        onChangeText={setPhoneNumber}
+      />
+      {errors.email && <Text style={errorStyles.errorText}>{errors.email}</Text>}
+      <Text style={datePicker.label}>Data urodzenia</Text>
+      <TouchableOpacity onPress={showDatepicker} style={datePicker.datePickerButton}>
+        <Text style={datePicker.datePickerButtonText}>{formatDate(birthDate)}</Text>
+      </TouchableOpacity>
       {show && (
         <DateTimePicker
           testID="dateTimePicker"
@@ -60,20 +128,26 @@ export default function RegisterScreen({ navigation }) {
       <TextInput
         style={globalStyles.input}
         placeholder="Hasło"
-        onChangeText={setPassword}
         secureTextEntry
-        value={password }
+        value={password}
+        onChangeText={setPassword}
         autoCapitalize="none"
       />
+      {errors.password && <Text style={e.errorText}>{errors.password}</Text>}
       <TextInput
         style={globalStyles.input}
         placeholder="Potwierdź hasło"
         secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
         autoCapitalize="none"
       />
-      <TouchableOpacity style={globalStyles.button}>
+      {errors.confirmPassword && <Text style={e.errorText}>{errors.confirmPassword}</Text>}
+      <TouchableOpacity style={globalStyles.button} onPress={handleSubmit}>
         <Text style={globalStyles.buttonText}>Zarejestruj się</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+
