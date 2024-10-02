@@ -41,6 +41,8 @@ public class SecurityConfiguration {
                 .hasRole("ADMIN")
                 .requestMatchers("/api/doctors/**")
                 .permitAll()
+                .requestMatchers("/api/appointments/**")
+                .hasRole("USER")
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

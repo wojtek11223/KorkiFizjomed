@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -16,4 +17,6 @@ public class DoctorInfoDTO {
     private String firstName;
     private String lastName;
     private Set<String> specializations;
+    private List<String> services;
+
 }

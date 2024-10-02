@@ -27,10 +27,12 @@ public class UserPointAction {
     private PointAction pointAction;
 
     private LocalDateTime actionDate;
-
+    private Integer points;
+  
     @PrePersist
     protected void onCreate() {
         actionDate = LocalDateTime.now();
+        user.setLoyaltyPoints(user.getLoyaltyPoints() + points);
     }
 
 }

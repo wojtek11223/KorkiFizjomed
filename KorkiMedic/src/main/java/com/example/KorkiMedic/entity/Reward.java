@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -25,12 +27,14 @@ public class Reward {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Reward(String name, String description, int i) {
-        this.name=name;
-        this.description=description;
-        pointsRequired=i;
-    }
+    @OneToMany(mappedBy = "reward", cascade = CascadeType.ALL)
+    private Set<ServReward> servRewards = new HashSet<>();
 
+    public Reward(String name, String description, int pointsRequired) {
+        this.name = name;
+        this.description = description;
+        this.pointsRequired = pointsRequired;
+    }
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -40,5 +44,4 @@ public class Reward {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }

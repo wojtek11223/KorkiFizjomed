@@ -5,9 +5,13 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { globalStyles, datePicker, errorStyles } from './styles';
+import { REACT_APP_API_URL } from '@env';
+import axios from 'axios';
+
 
 export default function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
@@ -58,9 +62,8 @@ export default function RegisterScreen({ navigation }) {
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       // Submit form
-      console.log('Form is valid');
       try {
-        const response = await fetch('http://your-api-url/api/password/reset-request', {
+        const response = await axios.post(`${REACT_APP_API_URL}/auth/signup`, {
             email: email,
             password: password,
             firstName: firstName,
@@ -69,10 +72,11 @@ export default function RegisterScreen({ navigation }) {
             dateOfBirth: birthDate
         });
         const data = await response.json();
-        Alert.alert('Reset Link Sent', data.message);
-    } catch (error) {
-        Alert.alert('Error', 'Failed to send reset link');
-    }
+        Alert.alert("Rejestracja zakończona pomyślnie");
+        } catch (error) {
+          Alert.alert('Błąd podczas rejestracji:', error.response?.data || error.message);
+
+        }
     } else {
       setErrors(formErrors);
     }

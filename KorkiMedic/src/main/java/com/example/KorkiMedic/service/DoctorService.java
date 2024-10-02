@@ -3,6 +3,7 @@ package com.example.KorkiMedic.service;
 import com.example.KorkiMedic.dto.DoctorAppointmentsDTO;
 import com.example.KorkiMedic.dto.DoctorInfoDTO;
 import com.example.KorkiMedic.entity.Appointment;
+import com.example.KorkiMedic.entity.Serv;
 import com.example.KorkiMedic.entity.Specialization;
 import com.example.KorkiMedic.entity.User;
 import com.example.KorkiMedic.enums.Role;
@@ -67,7 +68,10 @@ public class DoctorService {
                         user.getLastName(),
                         user.getSpecializations().stream()
                                 .map(Specialization::getName) // Assuming Specialization has a getName() method
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toSet()),
+                        user.getServices().stream()
+                                .map(Serv::getName) // Assuming Specialization has a getName() method
+                                .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
     }

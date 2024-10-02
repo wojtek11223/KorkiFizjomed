@@ -3,43 +3,72 @@ import { View, Text, StyleSheet, Button, Alert, ScrollView } from 'react-native'
 import { Picker } from '@react-native-picker/picker';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native'; // 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { REACT_APP_API_URL } from '@env';
 
-const AppointmentScreen = () => {
+
+const BookAppointmentScreen = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().split('T')[0].slice(0, 7));
   const [appointments, setAppointments] = useState([]);
-  const [doctors, setDoctors] = useState([]); // Lista lekarzy
+  const [doctors, setDoctors] = useState([]); 
+  const [selectedService, setSelectedService] = useState(null); // State for selected service
 
-  // Zakres wszystkich możliwych godzin
   const allTimes = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
     '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
     '16:00', '16:30', '17:00', '17:30', '18:00'
   ];
 
-
   const today = new Date();
   const formattedToday = today.toISOString().split('T')[0];
   const currentYearMonth = formattedToday.slice(0, 7);
 
   useEffect(() => {
-    setSelectedTime(null); // Resetuj wybraną godzinę po zmianie lekarza
-    setSelectedDate(''); // Resetuj datę po zmianie lekarza
+    setSelectedTime(null);
+    setSelectedDate('');
+    setSelectedService(null);
+
   }, [selectedDoctor]);
 
-  const onConfirmAppointment = () => {
-    if (selectedDoctor && selectedDate && selectedTime) {
-      Alert.alert(
-        'Wizyta zarezerwowana',
-        `Zarezerwowałeś wizytę u ${selectedDoctor} na dzień ${selectedDate} o godzinie ${selectedTime}.`
-      );
-      setSelectedDoctor(null);
-      setSelectedDate('');
-      setSelectedTime(null);
-    } else {
-      Alert.alert('Błąd', 'Proszę wybrać lekarza, datę oraz godzinę.');
+  const onConfirmAppointment = async () => {
+    if (selectedDoctor && selectedDate && selectedTime && selectedService) {
+      const appointmentData = {
+        doctorId: selectedDoctor,            // Identyfikator lekarza
+        serviceName: selectedService,           // Identyfikator usługi
+        date: `${selectedDate}T${selectedTime}`, // Data wizyty w formacie zgodnym z backendem
+        description: 'Checkup appointment', // Opis wizyty
+      }
+      try {
+        const token = await AsyncStorage.getItem('token');
+        // Wysłanie zapytania POST do API
+        const response = await axios.post(`${REACT_APP_API_URL}/api/appointments/create`, appointmentData, {
+          headers: {
+            'Content-Type': 'application/json',
+            // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        Alert.alert(
+          'Wizyta zarezerwowana',
+          `Zarezerwowałeś wizytę u ${selectedDoctor} na dzień ${selectedDate} o godzinie ${selectedTime}.`
+        );
+        setSelectedDoctor(null);
+        setSelectedDate('');
+        setSelectedTime(null);
+        // Obsługa odpowiedzi
+        console.log('Appointment created successfully:', response.data);
+        return response.data;
+      } catch (error) {
+        // Obsługa błędów
+        Alert.alert('Error creating appointment:', error.response?.data || error.message);
+      } 
+    }
+    else {
+      Alert.alert('Błąd', 'Proszę wybrać lekarza, datę, godzinę oraz typ konsultacji.');
     }
   };
 
@@ -49,6 +78,7 @@ const AppointmentScreen = () => {
 
   const handleMonthChange = (month) => {
     const selectedYearMonth = month.dateString.slice(0, 7);
+    // Prevent navigating to previous months
     if (selectedYearMonth < currentYearMonth) {
       setCurrentMonth(currentYearMonth);
     } else {
@@ -57,7 +87,7 @@ const AppointmentScreen = () => {
   };
 
   const getReservedTimesForDate = (date) => {
-    return doctors.flatMap(doctor => 
+    return doctors.flatMap(doctor =>
       doctor.reservedTimes.filter(item => item.date === date).map(item => item.time)
     );
   };
@@ -74,30 +104,36 @@ const AppointmentScreen = () => {
     return allTimes.filter(time => !reservedTimesForDate.includes(time) && !reservedTimesForDoctor.includes(time));
   };
 
-  const getAllReservedTimesForDoctor = (appointments, date) => {
+  const getAllReservedTimesForDoctor = (date) => {
     if (!appointments) return [];
-    return appointments.filter(item => item.date.toISOString().split('T')[0] === date).map(item => item.date.toISOString().split('T')[1]);
+    
+    return appointments.filter(item => item.date.split('T')[0] === date).map((item) => new Date(item.date)
+    .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
   };
 
-  // Funkcja do oznaczania dni tygodnia jako niedostępnych (soboty i niedziele)
+  // Function to disable weekends
   const getDisabledDates = () => {
-    let disabledDates = {};
-    for (let i = 0; i < 7; i++) {
-      const day = new Date();
-      day.setDate(day.getDate() + i);
-      const dateString = day.toISOString().split('T')[0];
-      const dayOfWeek = day.getDay(); // 0 = niedziela, 6 = sobota
+    const disabledDates = {};
+    const date = new Date();
+
+    // Loop over the next 365 days to disable weekends
+    for (let i = 0; i < 365; i++) {
+      const currentDate = new Date(date);
+      currentDate.setDate(date.getDate() + i);
+      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 6 = Saturday
       if (dayOfWeek === 0 || dayOfWeek === 6) {
-        disabledDates[dateString] = { disabled: true, color: 'gray' };
+        const dateString = currentDate.toISOString().split('T')[0];
+        disabledDates[dateString] = { disabled: true, disableTouchEvent: true, color: 'gray' };
       }
     }
+
     return disabledDates;
   };
+
   useEffect(() => {
     fetchDoctors();
   }, []);
 
-  // Fetch doctors from API
   const fetchDoctors = async () => {
     try {
       const response = await axios.get('http://192.168.0.101:8005/api/doctors/info');
@@ -124,6 +160,7 @@ const AppointmentScreen = () => {
       setAppointments([]);
     }
   };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Wybierz lekarza:</Text>
@@ -137,7 +174,21 @@ const AppointmentScreen = () => {
           <Picker.Item key={doctor.id} label={`${doctor.firstName} ${doctor.lastName} - ${[...doctor.specializations].join(', ')}`} value={doctor.id} />
         ))}
       </Picker>
-
+      {selectedDoctor && doctors.find(doctor => doctor.id === selectedDoctor)?.services.length > 0 && (
+        <>
+          <Text style={styles.title}>Wybierz rodzaj wizyty:</Text>
+          <Picker
+            selectedValue={selectedService}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSelectedService(itemValue)}
+          >
+            <Picker.Item label="Wybierz rodzaj wizyty..." value={null} />
+            {doctors.find(doctor => doctor.id === selectedDoctor).services.map((service, index) => (
+              <Picker.Item key={index} label={service} value={service} />
+            ))}
+          </Picker>
+        </>
+      )}
       {selectedDoctor && (
         <>
           <Text style={styles.title}>Wybierz datę wizyty:</Text>
@@ -146,12 +197,12 @@ const AppointmentScreen = () => {
             minDate={formattedToday}
             onDayPress={(day) => {
               setSelectedDate(day.dateString);
-              setSelectedTime(null); // Resetuj godzinę przy wyborze nowej daty
+              setSelectedTime(null);
             }}
             onMonthChange={handleMonthChange}
             markedDates={{ 
+              ...getDisabledDates(),
               ...markedDates,
-              ...getDisabledDates(), // Dodaj niedostępne dni do zaznaczenia
             }}
             theme={{
               todayTextColor: 'blue',
@@ -168,7 +219,7 @@ const AppointmentScreen = () => {
               textMonthFontSize: 18,
               textDayHeaderFontSize: 16,
             }}
-            firstDay={1} // Ustaw pierwszy dzień tygodnia na poniedziałek
+            firstDay={1} // Set the first day of the week to Monday
             monthFormat={'yyyy-MM'}
           />
 
@@ -182,7 +233,7 @@ const AppointmentScreen = () => {
               >
                 <Picker.Item label="Wybierz godzinę..." value={null} />
                 {allTimes.map((time, index) => {
-                  const isReserved = getAllReservedTimesForDoctor(appointments, selectedDate).includes(time);
+                  const isReserved = getAllReservedTimesForDoctor(selectedDate).includes(time);
                   return (
                     <Picker.Item
                       key={index}
@@ -221,4 +272,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AppointmentScreen;
+export default BookAppointmentScreen;

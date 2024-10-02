@@ -15,6 +15,11 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   input: {
     height: 50,
     borderColor: '#ccc',

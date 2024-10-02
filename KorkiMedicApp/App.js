@@ -8,9 +8,10 @@ import { Ionicons } from '@expo/vector-icons';
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import VisitsScreen from './screens/VistisScreen';
 import HomeScreen from './screens/HomeScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import AppointmentsScreen from './screens/AppointmentsScreen';
+import BookAppointmentScreen from './screens/BookAppointmentScreen';
 
 
 // Enable screens for better performance
@@ -38,7 +39,7 @@ const HomeTab = () => (
     })}
   >
     <Tab.Screen name="Główna strona" component={HomeScreen} />
-    <Tab.Screen name="Wizyty" component={VisitsScreen} />
+    <Tab.Screen name="Wizyty" component={AppointmentsScreen} />
     <Tab.Screen name="Ustawienia" component={SettingsScreen} />
   </Tab.Navigator>
 );
@@ -57,6 +58,7 @@ export default function App() {
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="HomeTabs" component={HomeTab} />
+        <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

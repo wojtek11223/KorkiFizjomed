@@ -7,10 +7,12 @@ import {
   ScrollView,
   RefreshControl,
   StyleSheet,
+  ActivityIndicator
 } from 'react-native';
 import { globalStyles, errorStyles } from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { REACT_APP_API_URL } from '@env';
 
 
 export default function LoginScreen({ navigation }) {
@@ -18,6 +20,7 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -41,10 +44,11 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = async () => {
+    setLoading(true);
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       try {
-        const response = await axios.post(`http://192.168.0.101:8005/auth/login`, {
+        const response = await axios.post(`${REACT_APP_API_URL}/auth/login`, {
           email: email,
           password: password,
         });
@@ -58,13 +62,24 @@ export default function LoginScreen({ navigation }) {
         }
       } catch (error) {
         console.error(error);
-        setErrors({ form: error.message || 'Wystąpił błąd podczas logowania' });
+        setErrors({ form: error.response.data || 'Wystąpił błąd podczas logowania' });
+      }finally {
+        setLoading(false);
       }
     } else {
       setErrors(formErrors);
+      setLoading(false);
     }
   };
   
+  if (loading) {
+    return (
+      <View style={globalStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loging...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -105,11 +120,3 @@ export default function LoginScreen({ navigation }) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
-  },
-});

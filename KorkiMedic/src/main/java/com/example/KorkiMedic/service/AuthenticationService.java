@@ -83,15 +83,12 @@ public class AuthenticationService {
         );
 
         if (!alreadyLoggedInToday) {
-            // Dodanie 10 punktów za codzienne logowanie
-            user.setLoyaltyPoints(user.getLoyaltyPoints() + dailyLoginAction.getPoints());
-            userRepository.save(user);
 
             // Zapisanie akcji punktowej
-            UserPointAction userPointAction = new UserPointAction(null, user, dailyLoginAction, now);
+            UserPointAction userPointAction = new UserPointAction(null, user, dailyLoginAction, now,10);
             userPointActionRepository.save(userPointAction);
 
-            System.out.println("Dodano " + dailyLoginAction.getPoints() + " punktów za codzienne logowanie użytkownikowi: " + user.getEmail());
+            System.out.println("Dodano 10 punktów za codzienne logowanie użytkownikowi: " + user.getEmail());
         }
     }
 }

@@ -1,27 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {
   const handleLogout = async () => {
     try {
-      const response = await axios.post(`/logout`, {} ,{  headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}` // Dodaj token autoryzacyjny tutaj
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Nie udało się wylogować');
-      }
-
+      await AsyncStorage.removeItem('token');
       // Po pomyślnym wylogowaniu
       Alert.alert('Wylogowano pomyślnie');
       navigation.navigate('Login');
       // Tutaj możesz dodać nawigację do ekranu logowania lub inny ekran
     } catch (error) {
       console.error('Błąd podczas wylogowywania:', error);
-      Alert.alert('Błąd podczas wylogowywania');
+      Alert.alert('Error creating appointment:', error.response?.data || error.message);
     }
   };
 

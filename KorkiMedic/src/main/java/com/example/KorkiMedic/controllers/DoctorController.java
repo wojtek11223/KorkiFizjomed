@@ -3,6 +3,7 @@ package com.example.KorkiMedic.controllers;
 import com.example.KorkiMedic.dto.DoctorAppointmentsDTO;
 import com.example.KorkiMedic.dto.DoctorInfoDTO;
 import com.example.KorkiMedic.entity.User;
+import com.example.KorkiMedic.exceptions.EntityNotFoundException;
 import com.example.KorkiMedic.service.DoctorService;
 import com.example.KorkiMedic.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class DoctorController {
     public ResponseEntity<?> getDoctorAppointments(@PathVariable Long doctorId) {
         // Wyszukaj doktora po ID (w rzeczywistej aplikacji prawdopodobnie będziesz potrzebować repozytorium do tego)
         if (!userService.isUserDoctor(doctorId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nie ma takiego lekarza");
+            throw EntityNotFoundException.doctorNotFound(doctorId.toString());
         }
         User doctor = userService.findUserById(doctorId);
 

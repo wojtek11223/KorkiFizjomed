@@ -32,7 +32,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "service_id")
-    private Service service;
+    private Serv service;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
@@ -41,6 +41,8 @@ public class Appointment {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+
 
     @PrePersist
     protected void onCreate() {
