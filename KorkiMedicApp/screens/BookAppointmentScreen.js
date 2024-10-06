@@ -16,6 +16,8 @@ const BookAppointmentScreen = () => {
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]); 
   const [selectedService, setSelectedService] = useState(null); // State for selected service
+  const [rewards, setRewards] = useState([]);
+  const [selectedReward, setSelectedReward] = useState(null);
 
   const allTimes = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -40,7 +42,8 @@ const BookAppointmentScreen = () => {
         doctorId: selectedDoctor,            // Identyfikator lekarza
         serviceName: selectedService,           // Identyfikator usługi
         date: `${selectedDate}T${selectedTime}`, // Data wizyty w formacie zgodnym z backendem
-        description: 'Checkup appointment', // Opis wizyty
+        description: 'Checkup appointment', 
+        rewardId: selectedReward // Opis wizyty
       }
       try {
         const token = await AsyncStorage.getItem('token');
@@ -86,24 +89,6 @@ const BookAppointmentScreen = () => {
     }
   };
 
-  const getReservedTimesForDate = (date) => {
-    return doctors.flatMap(doctor =>
-      doctor.reservedTimes.filter(item => item.date === date).map(item => item.time)
-    );
-  };
-
-  const getReservedTimesForDoctorAndDate = (doctor, date) => {
-    if (!doctor) return [];
-    return doctor.reservedTimes.filter(item => item.date === date).map(item => item.time);
-  };
-
-  const getAvailableTimes = (doctor, selectedDate) => {
-    if (!doctor) return [];
-    const reservedTimesForDate = getReservedTimesForDate(selectedDate);
-    const reservedTimesForDoctor = getReservedTimesForDoctorAndDate(doctor, selectedDate);
-    return allTimes.filter(time => !reservedTimesForDate.includes(time) && !reservedTimesForDoctor.includes(time));
-  };
-
   const getAllReservedTimesForDoctor = (date) => {
     if (!appointments) return [];
     
@@ -136,7 +121,13 @@ const BookAppointmentScreen = () => {
 
   const fetchDoctors = async () => {
     try {
-      const response = await axios.get('http://192.168.0.101:8005/api/doctors/info');
+      const token = await AsyncStorage.getItem('token');
+
+      const response = await axios.get('http://192.168.0.101:8005/api/doctors/info',{headers: {
+        'Content-Type': 'application/json',
+        // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:
+        'Authorization': `Bearer ${token}`,
+      }});
       setDoctors(response.data);
     } catch (error) {
       console.error('Error fetching doctors:', error);
@@ -145,7 +136,13 @@ const BookAppointmentScreen = () => {
 
   const fetchAppointments = async (doctorId) => {
     try {
-      const response = await axios.get(`http://192.168.0.101:8005/api/doctors/${doctorId}/appointments`);
+      const token = await AsyncStorage.getItem('token');
+
+      const response = await axios.get(`http://192.168.0.101:8005/api/doctors/${doctorId}/appointments`,{headers: {
+        'Content-Type': 'application/json',
+        // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:
+        'Authorization': `Bearer ${token}`,
+      }});
       setAppointments(response.data.appointments);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -160,6 +157,22 @@ const BookAppointmentScreen = () => {
       setAppointments([]);
     }
   };
+  
+  const fetchRewards = async (service) => {
+    try {
+      const response = await axios.get(`http://192.168.0.101:8005/api/rewards/${service}`);
+      setRewards(response.data);
+    } catch (error) {
+      console.error('Error fetching rewards:', error);
+    }
+  };
+  
+  const  handleServiceChange = (service) => {
+    if(service) {
+      fetchRewards(service);
+      setSelectedService(service);
+    }
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -180,15 +193,35 @@ const BookAppointmentScreen = () => {
           <Picker
             selectedValue={selectedService}
             style={styles.picker}
-            onValueChange={(itemValue) => setSelectedService(itemValue)}
+            onValueChange={(itemValue) => handleServiceChange(itemValue)}
           >
             <Picker.Item label="Wybierz rodzaj wizyty..." value={null} />
             {doctors.find(doctor => doctor.id === selectedDoctor).services.map((service, index) => (
-              <Picker.Item key={index} label={service} value={service} />
+              <Picker.Item key={index} label={service.name} value={service.id} />
             ))}
           </Picker>
         </>
       )}
+      {selectedService && rewards.length > 0 && (
+        <>
+          <Text style={styles.title}>Wykorzystaj punkty:</Text>
+          <Picker
+            selectedValue={selectedReward}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSelectedReward(itemValue)}
+          >
+             <Picker.Item label="Brak nagrody.." value={null} />
+             {rewards.map((reward) => (
+              <Picker.Item 
+                key={reward.rewardId} 
+                label={`${reward.rewardName} `} 
+                value={reward.rewardId} 
+              />
+            ))}
+          </Picker>
+        </>
+      )}
+
       {selectedDoctor && (
         <>
           <Text style={styles.title}>Wybierz datę wizyty:</Text>

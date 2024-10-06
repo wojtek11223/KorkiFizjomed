@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AppointmentRequest {
     private Long doctorId;
-    private String serviceName;
+    private Long serviceName;
     private LocalDateTime date;
     private String description;
+    private Long rewardId;
 }

@@ -43,6 +43,8 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers("/api/appointments/**")
                 .hasRole("USER")
+                .requestMatchers("/api/rewards/**")
+                .permitAll()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

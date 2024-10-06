@@ -3,6 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity }
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
+import LoadingComponent from '../compoments/LoadingComponent';
 
 const AppointmentsScreen = ({ navigation }) => {
 
@@ -35,9 +36,9 @@ const AppointmentsScreen = ({ navigation }) => {
       <View style={styles.appointmentCard}>
         <Text style={styles.appointmentTitle}>Doctor: {item.doctorFirstName} {item.doctorLastName}</Text>
         <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
-        <Text>Rodzaj usługi: {item.service.name}</Text>
-        <Text>Opis: {item.service.description}</Text>
-        <Text>Cena: {item.service.price}</Text>
+        <Text>Rodzaj usługi: {item.serviceName}</Text>
+        <Text>Opis: {item.serviceDescription}</Text>
+        <Text>Cena: {item.price}</Text>
         <Text>Status: {item.status}</Text>
       </View>
     );
@@ -45,17 +46,14 @@ const AppointmentsScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading appointments...</Text>
-      </View>
+      LoadingComponent()
     );
   }
 
   return (
     <View style={styles.container}>
       {appointments.length === 0 ? (
-        <Text style={styles.noAppointmentsText}>No appointments found</Text>
+        <Text style={styles.noAppointmentsText}>Nie ma żadnych rejestracji aktualnie. Umów się już teraz!</Text>
       ) : (
         <FlatList
           data={appointments}
@@ -68,7 +66,7 @@ const AppointmentsScreen = ({ navigation }) => {
             style={styles.bookButton}
             onPress={() => navigation.navigate('BookAppointment')}
         >
-        <Text style={styles.bookButtonText}>Book an Appointment</Text>
+        <Text style={styles.bookButtonText}>Zarejestruj wizytę</Text>
       </TouchableOpacity>
     </View>
   );

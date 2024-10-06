@@ -19,7 +19,9 @@ public class AppointmentDTO {
     private String patientLastName;
     private String doctorFirstName;
     private String doctorLastName;
-    private Serv service;
+    private String serviceName;
+    private String serviceDescription;
+    private int price;
     private LocalDateTime appointmentDateTime;
     private String status;
 }
