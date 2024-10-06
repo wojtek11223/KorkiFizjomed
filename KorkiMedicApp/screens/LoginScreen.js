@@ -13,7 +13,7 @@ import { globalStyles, errorStyles } from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
-
+import LoadingComponent from '../compoments/LoadingComponent';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -54,9 +54,9 @@ export default function LoginScreen({ navigation }) {
         });
   
         if (response.status === 200) {
-          const token = response.data.token;
-          await AsyncStorage.setItem('token', token); // Zapis do AsyncStorage
+          await AsyncStorage.setItem('token', response.data.token);
           navigation.navigate('HomeTabs');
+          setErrors({});
         } else {
           setErrors({ form: response.data.message || 'Błąd logowania' });
         }
@@ -74,10 +74,7 @@ export default function LoginScreen({ navigation }) {
   
   if (loading) {
     return (
-      <View style={globalStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loging...</Text>
-      </View>
+      LoadingComponent()
     );
   }
 

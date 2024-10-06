@@ -22,12 +22,12 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @PostMapping("/create")
-    public ResponseEntity<Appointment> createAppointment(@RequestBody AppointmentRequest appointmentRequest) {
+    public ResponseEntity<String> createAppointment(@RequestBody AppointmentRequest appointmentRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String username = userDetails.getUsername();
         Appointment appointment = appointmentService.createAppointment(appointmentRequest, username);
-        return ResponseEntity.ok(appointment);
+        return ResponseEntity.ok("Udało się zarejestrować");
     }
     @GetMapping("/patient")
     public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPatient() {
@@ -43,5 +43,17 @@ public class AppointmentController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         List<AppointmentDTO> appointmentDTOs = appointmentService.getAppointmentsByDoctor(userDetails.getUsername());
         return ResponseEntity.ok(appointmentDTOs);
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmAppointment(@PathVariable Long id) {
+        appointmentService.confirmAppointment(id);
+        return ResponseEntity.ok("Wizyta została potwierdzona");
+    }
+
+    @PostMapping("/{id}/cancel")
+    public void cancelAppointment(@PathVariable Long id) {
+        appointmentService.cancelAppointment(id);
+        return ResponseEntity.ok("Wizyta została anulowana");
     }
 }

@@ -3,16 +3,19 @@ package com.example.KorkiMedic.service;
 import com.example.KorkiMedic.dto.AppointmentDTO;
 import com.example.KorkiMedic.dto.AppointmentRequest;
 import com.example.KorkiMedic.entity.Appointment;
+import com.example.KorkiMedic.entity.ServReward;
 import com.example.KorkiMedic.entity.User;
 import com.example.KorkiMedic.entity.Serv;
 import com.example.KorkiMedic.exceptions.EntityNotFoundException;
 import com.example.KorkiMedic.repository.AppointmentRepository;
+import com.example.KorkiMedic.repository.ServRewardRepository;
 import com.example.KorkiMedic.repository.UserRepository;
 import com.example.KorkiMedic.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,9 @@ public class AppointmentService {
     @Autowired
     private ServiceRepository serviceRepository;
 
+    @Autowired
+    private ServRewardRepository servRewardRepository;
+
     public Appointment createAppointment(AppointmentRequest appointmentRequest,String PatientEmail) {
         User patient = userRepository.findByEmail(PatientEmail)
                 .orElseThrow(() -> EntityNotFoundException.patientNotFound(PatientEmail));
@@ -34,11 +40,12 @@ public class AppointmentService {
         User doctor = userRepository.findById(appointmentRequest.getDoctorId())
                 .orElseThrow(() -> EntityNotFoundException.doctorNotFound(appointmentRequest.getDoctorId().toString()));
 
-        Serv service = serviceRepository.findByName(appointmentRequest.getServiceName())
-                .orElseThrow(() -> EntityNotFoundException.serviceNotFound(appointmentRequest.getServiceName()));
-        Appointment appoin = appointmentRepository.findByDoctorAndDate(doctor,appointmentRequest.getDate())
-                .orElseThrow(EntityNotFoundException::dateReservedFound);
+        Serv service = serviceRepository.findById(appointmentRequest.getServiceName())
+                .orElseThrow(() -> EntityNotFoundException.serviceNotFound(appointmentRequest.getServiceName().toString()));
 
+        if(appointmentRepository.findByDoctorAndDate(doctor,appointmentRequest.getDate()).isPresent()) {
+            throw EntityNotFoundException.dateReservedFound();
+        }
 
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
@@ -46,10 +53,26 @@ public class AppointmentService {
         appointment.setService(service);
         appointment.setDate(java.sql.Timestamp.valueOf(appointmentRequest.getDate()));
         appointment.setDescription(appointmentRequest.getDescription());
-
+        if(appointmentRequest.getRewardId() != null) {
+            ServReward servReward = servRewardRepository.findById(appointmentRequest.getRewardId()).orElse(null);
+            assert servReward != null;
+            appointment.setPrice(servReward.getServ().getPrice() - servReward.getDiscount());
+        }
         return appointmentRepository.save(appointment);
     }
+    public void confirmAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
+        appointment.setStatus("Potwierdzona");
+        appointmentRepository.save(appointment);
+    }
 
+    public void cancelAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
+        appointment.setStatus("Anulowana");
+        appointmentRepository.save(appointment);
+    }
     public List<AppointmentDTO> getAppointmentsByPatient(String patientEmail) {
         User patient = userRepository.findByEmail(patientEmail)
                 .orElseThrow(() -> EntityNotFoundException.patientNotFound(patientEmail));
@@ -70,13 +93,13 @@ public class AppointmentService {
     private AppointmentDTO mapAppointmentToDTO(Appointment appointment) {
         return new AppointmentDTO(
                 appointment.getId(),
-                appointment.getPatient().getFirstName(),
-                appointment.getPatient().getLastName(),
                 appointment.getDoctor().getFirstName(),
                 appointment.getDoctor().getLastName(),
-                appointment.getService(), // Cały obiekt Serv
+                appointment.getService().getName(),
+                appointment.getDescription(),
+                appointment.getPrice(),
                 appointment.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime(),
-                "confirmed" // Przykładowy status, może być dynamiczny
+                appointment.getStatus()
         );
     }
 
@@ -86,4 +109,6 @@ public class AppointmentService {
                 .map(this::mapAppointmentToDTO)
                 .collect(Collectors.toList());
     }
+
+
 }

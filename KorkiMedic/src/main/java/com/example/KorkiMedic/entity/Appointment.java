@@ -37,16 +37,21 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
+    private int price=0;
+
     private String description;
+
+    private String status;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        this.price=service.getPrice();
+        patient.setLoyaltyPoints(patient.getLoyaltyPoints()+price);
+        this.status  = "Niepotwierdzony";
     }
 
     @PreUpdate

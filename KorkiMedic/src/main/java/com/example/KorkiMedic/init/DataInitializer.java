@@ -126,9 +126,9 @@ public class DataInitializer implements CommandLineRunner {
 
             // Creating doctors with specializations and services
             User doctor1 = new User(null, "John", "Doe", "john@example.com", "123456788", LocalDate.of(1980, 5, 15), 0,
-                    Set.of(Role.DOCTOR), Set.of(cardiology, neurology), Set.of(service1, service2), null, null, passwordEncoder.encode("qwerty"));
+                    Set.of(Role.DOCTOR,Role.USER), Set.of(cardiology, neurology), Set.of(service1, service2), null, null, passwordEncoder.encode("qwerty"));
             User doctor2 = new User(null, "Jane", "Smith", "jane.smith@example.com", "987654389", LocalDate.of(1975, 3, 25), 0,
-                    Set.of(Role.DOCTOR), Set.of(orthopedics), Set.of(service1, service3), null, null, passwordEncoder.encode("qwerty"));
+                    Set.of(Role.DOCTOR,Role.USER), Set.of(orthopedics), Set.of(service1, service3), null, null, passwordEncoder.encode("qwerty"));
 
             userRepository.saveAll(List.of(doctor1, doctor2));
 
@@ -145,15 +145,113 @@ public class DataInitializer implements CommandLineRunner {
 
                 Date tomorrowDate = calendar.getTime();
 
-                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate, "Routine checkup", null, null);
+                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate,100, "Rutynowa kontrola", "Zatwierdzona", null, null);
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 calendar.set(Calendar.HOUR, 13);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
 
                 tomorrowDate = calendar.getTime();
-                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate, "Scheduled surgery", null, null);
+                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate, 0, "Scheduled surgery", "Anulowana", null, null);
                 appointmentRepository.saveAll(List.of(appointment1, appointment2));
+                adminRole = new HashSet<>();
+                adminRole.add(Role.ADMIN);
+
+               userRole = new HashSet<>();
+                userRole.add(Role.USER);
+
+                multipleRoles = new HashSet<>();
+                multipleRoles.add(Role.USER);
+                multipleRoles.add(Role.ADMIN);
+
+                // Tworzenie dodatkowych użytkowników
+                User user4 = new User(null, "Katarzyna", "Wiśniewska", "katarzyna.wisniewska@example.com", "777777777", LocalDate.of(1995, 1, 10), 0,
+                        userRole, passwordEncoder.encode("haslo123"));
+                User user5 = new User(null, "Marek", "Zieliński", "marek.zielinski@example.com", "444444444", LocalDate.of(1980, 11, 5), 0,
+                        adminRole, passwordEncoder.encode("haslo456"));
+                User user6 = new User(null, "Paulina", "Dąbrowska", "paulina.dabrowska@example.com", "666666666", LocalDate.of(1992, 6, 18), 0,
+                        multipleRoles, passwordEncoder.encode("haslo789"));
+
+                userRepository.saveAll(List.of(user4, user5, user6));
+
+                // Dodatkowe specjalizacje
+                Specialization dermatology = new Specialization(null, "Dermatologia");
+                Specialization pediatrics = new Specialization(null, "Pediatria");
+                Specialization psychiatry = new Specialization(null, "Psychiatria");
+
+                specializationRepository.saveAll(Set.of(dermatology, pediatrics, psychiatry));
+
+                // Dodatkowe usługi
+                Serv service4 = new Serv();
+                service4.setName("Konsultacja Dermatologiczna");
+                service4.setDescription("Konsultacja z dermatologiem.");
+                service4.setPrice(180);
+
+                Serv service5 = new Serv();
+                service5.setName("Terapia Psychologiczna");
+                service5.setDescription("Indywidualna sesja terapeutyczna.");
+                service5.setPrice(220);
+
+                Serv service6 = new Serv();
+                service6.setName("Rehabilitacja");
+                service6.setDescription("Zabieg rehabilitacyjny.");
+                service6.setPrice(250);
+
+                servRepository.save(service4);
+                servRepository.save(service5);
+                servRepository.save(service6);
+
+                // Nowe nagrody
+                Reward reward4 = new Reward();
+                reward4.setName("Konsultacja dietetyczna");
+                reward4.setDescription("Bezpłatna konsultacja dietetyczna.");
+                reward4.setPointsRequired(150);
+
+                Reward reward5 = new Reward();
+                reward5.setName("Bezpłatne USG");
+                reward5.setDescription("Bezpłatne wykonanie USG.");
+                reward5.setPointsRequired(400);
+
+                rewardRepository.save(reward4);
+                rewardRepository.save(reward5);
+
+                // Nowe powiązania między usługami a nagrodami z obniżką
+                ServReward servReward4 = new ServReward(service4, reward4, 50); // 50% zniżki na Konsultację Dermatologiczną
+                ServReward servReward5 = new ServReward(service6, reward5, 100); // 100% zniżki (darmowe) na Rehabilitację
+
+                servRewardRepository.save(servReward4);
+                servRewardRepository.save(servReward5);
+
+                // Dodanie nowych lekarzy ze specjalizacjami i usługami
+                User doctor3 = new User(null, "Agnieszka", "Kwiatkowska", "agnieszka.kwiatkowska@example.com", "888888888", LocalDate.of(1982, 4, 5), 0,
+                        Set.of(Role.DOCTOR,Role.USER), Set.of(dermatology), Set.of(service4), null, null, passwordEncoder.encode("haslo123"));
+                User doctor4 = new User(null, "Tomasz", "Lewandowski", "tomasz.lewandowski@example.com", "999999999", LocalDate.of(1978, 9, 20), 0,
+                        Set.of(Role.DOCTOR,Role.USER), Set.of(pediatrics, psychiatry), Set.of(service5), null, null, passwordEncoder.encode("haslo123"));
+
+                userRepository.saveAll(List.of(doctor3, doctor4));
+
+                // Tworzenie przykładowych wizyt
+                patient = userRepository.findByEmail("paulina.dabrowska@example.com").orElseThrow(() -> new RuntimeException("Użytkownik nie znaleziony"));
+
+                calendar = Calendar.getInstance();
+
+                // Wizyta za dwa dni
+                calendar.add(Calendar.DAY_OF_YEAR, 2);
+                calendar.set(Calendar.HOUR_OF_DAY, 10);
+                calendar.set(Calendar.MINUTE, 30);
+                calendar.set(Calendar.SECOND, 0);
+
+                Date futureDate = calendar.getTime();
+
+                Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+                calendar.set(Calendar.HOUR_OF_DAY, 12);
+                calendar.set(Calendar.MINUTE, 0);
+                calendar.set(Calendar.SECOND, 0);
+
+                futureDate = calendar.getTime();
+                Appointment appointment4 = new Appointment(null, patient, doctor4, service5, futureDate,200, "Terapia psychologiczna", "Anulowany" ,null, null);
+                appointmentRepository.saveAll(List.of(appointment3, appointment4));
             }
 
             if (pointActionRepository.count() == 0) {
