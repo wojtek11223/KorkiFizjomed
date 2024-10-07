@@ -12,7 +12,7 @@ public class DoctorAppointmentsDTO {
     private String doctorFirstName;
     private String doctorLastName;
     private List<String> specializations;
-    private List<String> services;
+    private List<ServiceDTO> services;
     private List<AppointmentInfo> appointments;
 
     @Data

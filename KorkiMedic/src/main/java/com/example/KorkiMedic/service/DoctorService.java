@@ -2,6 +2,7 @@ package com.example.KorkiMedic.service;
 
 import com.example.KorkiMedic.dto.DoctorAppointmentsDTO;
 import com.example.KorkiMedic.dto.DoctorInfoDTO;
+import com.example.KorkiMedic.dto.ServiceDTO;
 import com.example.KorkiMedic.entity.Appointment;
 import com.example.KorkiMedic.entity.Serv;
 import com.example.KorkiMedic.entity.Specialization;
@@ -45,10 +46,12 @@ public class DoctorService {
                 .map(Specialization::getName)
                 .collect(Collectors.toList());
 
-        List<String> services = appointments.stream()
-                .map(appointment -> appointment.getService().getName())
-                .distinct()
+        List<ServiceDTO> services = appointments.stream()
+                .map(appointment -> new ServiceDTO(
+                        appointment.getService().getId(),
+                        appointment.getService().getName()))
                 .collect(Collectors.toList());
+
 
         return new DoctorAppointmentsDTO(
                 doctor.getId(),
@@ -70,7 +73,9 @@ public class DoctorService {
                                 .map(Specialization::getName) // Assuming Specialization has a getName() method
                                 .collect(Collectors.toSet()),
                         user.getServices().stream()
-                                .map(Serv::getName) // Assuming Specialization has a getName() method
+                                .map(serv -> new ServiceDTO(
+                                        serv.getId(),
+                                        serv.getName())) // Assuming Specialization has a getName() method
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());

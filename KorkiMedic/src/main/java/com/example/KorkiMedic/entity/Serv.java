@@ -29,9 +29,6 @@ public class Serv {
     @OneToMany(mappedBy = "serv", cascade = CascadeType.ALL)
     private Set<ServReward> servRewards = new HashSet<>();
 
-    public Serv(Object o, String consultation, String generalMedicalConsultation, int i) {
-    }
-
     @PrePersist
     protected void onCreate() {
 

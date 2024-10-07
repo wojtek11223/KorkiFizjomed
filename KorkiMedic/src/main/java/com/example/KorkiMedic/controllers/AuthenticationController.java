@@ -36,7 +36,7 @@ public class AuthenticationController {
         authenticationService.addDailyLoginPoints(authenticatedUser);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken,jwtService.getExpirationTime());
+        LoginResponse loginResponse = new LoginResponse(jwtToken,jwtService.getExpirationTime(),authenticatedUser.getFirstName(), authenticatedUser.getLastName(), authenticatedUser.getLoyaltyPoints());
         return ResponseEntity.ok(loginResponse);
     }
 }

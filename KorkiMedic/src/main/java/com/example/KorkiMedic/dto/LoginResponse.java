@@ -13,5 +13,8 @@ public class LoginResponse {
     private String token;
 
     private long expiresIn;
+    private String firstName;
+    private String lastName;
+    int points;
 
 }

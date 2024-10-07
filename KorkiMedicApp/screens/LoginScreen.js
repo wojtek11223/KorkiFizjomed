@@ -54,9 +54,11 @@ export default function LoginScreen({ navigation }) {
         });
   
         if (response.status === 200) {
-          const token = response.data.token;
-          await AsyncStorage.setItem('token', token); // Zapis do AsyncStorage
+          await AsyncStorage.setItem('token', response.data.token);
+          const jsonValue = JSON.stringify(response.data); // Serializacja obiektu
+          await AsyncStorage.setItem('UserInfo', jsonValue); // Zapis w AsyncStorage 
           navigation.navigate('HomeTabs');
+          setErrors({});
         } else {
           setErrors({ form: response.data.message || 'Błąd logowania' });
         }

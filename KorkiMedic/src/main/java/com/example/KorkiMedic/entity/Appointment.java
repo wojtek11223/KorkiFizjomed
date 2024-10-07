@@ -37,6 +37,8 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
+    private int price=0;
+
     private String description;
 
     private LocalDateTime createdAt;
@@ -47,6 +49,8 @@ public class Appointment {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        this.price=service.getPrice();
+        patient.setLoyaltyPoints(patient.getLoyaltyPoints()+price);
     }
 
     @PreUpdate
