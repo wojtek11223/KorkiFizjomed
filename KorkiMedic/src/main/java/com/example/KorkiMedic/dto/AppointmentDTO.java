@@ -15,11 +15,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AppointmentDTO {
     private Long id;
-    private String patientFirstName;
-    private String patientLastName;
-    private String doctorFirstName;
-    private String doctorLastName;
-    private Serv service;
+    private String firstName;
+    private String lastName;
+    private String serviceName;
+    private String appointmentDescription;
+    private int price;
     private LocalDateTime appointmentDateTime;
     private String status;
+    private boolean isDoctorAppointment;
 }

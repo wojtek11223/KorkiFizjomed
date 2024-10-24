@@ -1,61 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
+import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusEffect
+import LoadingComponent from '../compoments/LoadingComponent';
 
 const AppointmentsScreen = ({ navigation }) => {
-
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAppointments = async () => {
     try {
+      setLoading(true);
       const token = await AsyncStorage.getItem('token');
       const response = await axios.get(`${REACT_APP_API_URL}/api/appointments/patient`,{
         headers: {
         'Content-Type': 'application/json',
-        // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:
         'Authorization': `Bearer ${token}`,
       }});
       setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      Alert.alert('Error', error.response?.data || error.message)
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
-  const renderAppointment = ({ item }) => {
-    return (
-      <View style={styles.appointmentCard}>
-        <Text style={styles.appointmentTitle}>Doctor: {item.doctorFirstName} {item.doctorLastName}</Text>
-        <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
-        <Text>Rodzaj usługi: {item.service.name}</Text>
-        <Text>Opis: {item.service.description}</Text>
-        <Text>Cena: {item.service.price}</Text>
-        <Text>Status: {item.status}</Text>
-      </View>
-    );
-  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchAppointments();
+    }, [])
+  );
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading appointments...</Text>
-      </View>
+      LoadingComponent()
     );
   }
+  const renderAppointment = ({ item }) => {
+    return (
+      <TouchableOpacity
+        style={styles.appointmentCard}
+        onPress={() => navigation.navigate('AppointmentDetail', { appointment: item })}
+      >
+        <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
+        <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
+        <Text>Rodzaj usługi: {item.serviceName}</Text>
+        <Text>Opis: {item.serviceDescription}</Text>
+        <Text>Cena: {item.price}</Text>
+        <Text>Status: {item.status}</Text>
+      </TouchableOpacity>
+    );
+  };
 
+  
   return (
     <View style={styles.container}>
       {appointments.length === 0 ? (
-        <Text style={styles.noAppointmentsText}>No appointments found</Text>
+        <Text style={styles.noAppointmentsText}>Nie ma żadnych rejestracji aktualnie. Umów się już teraz!</Text>
       ) : (
         <FlatList
           data={appointments}
@@ -68,7 +72,7 @@ const AppointmentsScreen = ({ navigation }) => {
             style={styles.bookButton}
             onPress={() => navigation.navigate('BookAppointment')}
         >
-        <Text style={styles.bookButtonText}>Book an Appointment</Text>
+        <Text style={styles.bookButtonText}>Zarejestruj wizytę</Text>
       </TouchableOpacity>
     </View>
   );

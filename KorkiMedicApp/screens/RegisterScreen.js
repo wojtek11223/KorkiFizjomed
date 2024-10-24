@@ -30,7 +30,7 @@ export default function RegisterScreen({ navigation }) {
     setBirthDate(currentDate);
   };
 
-  const showDatepicker = () => {
+  const showDatepicker = ({ navigation }) => {
     setShow(true);
   };
 
@@ -64,18 +64,17 @@ export default function RegisterScreen({ navigation }) {
       // Submit form
       try {
         const response = await axios.post(`${REACT_APP_API_URL}/auth/signup`, {
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
-            phoneNumber: phoneNumber,
-            dateOfBirth: birthDate
+          email: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: phoneNumber,
+          dateOfBirth: birthDate
         });
-        const data = await response.json();
-        Alert.alert("Rejestracja zakończona pomyślnie");
+        Alert.alert(response?.data || "ok");
+        navigation.navigate('Login');
         } catch (error) {
           Alert.alert('Błąd podczas rejestracji:', error.response?.data || error.message);
-
         }
     } else {
       setErrors(formErrors);

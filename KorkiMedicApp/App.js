@@ -12,37 +12,14 @@ import HomeScreen from './screens/HomeScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import AppointmentsScreen from './screens/AppointmentsScreen';
 import BookAppointmentScreen from './screens/BookAppointmentScreen';
-
+import HomeTab from './screens/HomeTab';
+import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
+import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
 
 // Enable screens for better performance
 enableScreens();
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-
-const HomeTab = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ focused, color, size }) => {
-        let iconName;
-        if (route.name === 'Główna strona') {
-          iconName = focused ? 'home' : 'home-outline';
-        } else if (route.name === 'Wizyty') {
-          iconName = focused ? 'calendar' : 'calendar-outline';
-        } else if (route.name === 'Ustawienia') {
-          iconName = focused ? 'settings' : 'settings-outline';
-        }
-        return <Ionicons name={iconName} size={size} color={color} />;
-      },
-      tabBarActiveTintColor: 'tomato',
-      tabBarInactiveTintColor: 'gray',
-    })}
-  >
-    <Tab.Screen name="Główna strona" component={HomeScreen} />
-    <Tab.Screen name="Wizyty" component={AppointmentsScreen} />
-    <Tab.Screen name="Ustawienia" component={SettingsScreen} />
-  </Tab.Navigator>
-);
 
 export default function App() {
   return (
@@ -51,7 +28,7 @@ export default function App() {
         initialRouteName="Login"
         screenOptions={{
           headerShown: false,
-          animation: 'slide_from_right', // Możesz zmienić na inne style, np. 'fade_from_bottom'
+          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
@@ -59,6 +36,8 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="HomeTabs" component={HomeTab} />
         <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
+        <Stack.Screen name="DoctorBookAppointment" component={DoctorAppointmentsScreen} />
+        <Stack.Screen name="AppointmentDetail" component={AppointmentDetailScreen} options={{ title: 'Szczegóły Wizyty' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

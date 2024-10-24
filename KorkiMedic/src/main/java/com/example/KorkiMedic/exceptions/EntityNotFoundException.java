@@ -23,4 +23,12 @@ public class EntityNotFoundException extends RuntimeException {
     public static EntityNotFoundException dateReservedFound() {
         return new EntityNotFoundException("Wybrany termin jest niedostępny");
     }
+
+    public static EntityNotFoundException AppointmentNotFoundException() {
+        return new EntityNotFoundException("Wybrany termin jest niedostępny");
+    }
+
+    public static EntityNotFoundException AppointmentNotDoctorException() {
+        return new EntityNotFoundException("Wybrany wizyta nie należy do lekarza");
+    }
 }

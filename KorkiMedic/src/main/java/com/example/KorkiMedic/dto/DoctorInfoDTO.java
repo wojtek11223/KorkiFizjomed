@@ -13,10 +13,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorInfoDTO {
-    Long id;
+    private Long id;
     private String firstName;
     private String lastName;
     private Set<String> specializations;
-    private List<String> services;
+    private List<ServiceDTO> services;
 
 }

@@ -13,7 +13,7 @@ import { globalStyles, errorStyles } from './styles';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
-
+import LoadingComponent from '../compoments/LoadingComponent';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -30,7 +30,6 @@ export default function LoginScreen({ navigation }) {
   };
 
   const validateForm = () => {
-    //console.log(REACT_APP_API_URL);
     let formErrors = {};
     if (!email) {
       formErrors.email = 'Email jest wymagany';
@@ -48,15 +47,16 @@ export default function LoginScreen({ navigation }) {
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       try {
-        const response = await axios.post(`${REACT_APP_API_URL}/auth/login`, {
+        console.log(REACT_APP_API_URL);
+        const response = await axios.post(`http://192.168.0.101:8005/auth/login`, {
           email: email,
           password: password,
         });
   
         if (response.status === 200) {
-          const token = response.data.token;
-          await AsyncStorage.setItem('token', token); // Zapis do AsyncStorage
+          await AsyncStorage.setItem('token', response.data.token);
           navigation.navigate('HomeTabs');
+          setErrors({});
         } else {
           setErrors({ form: response.data.message || 'Błąd logowania' });
         }
@@ -74,10 +74,7 @@ export default function LoginScreen({ navigation }) {
   
   if (loading) {
     return (
-      <View style={globalStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loging...</Text>
-      </View>
+      LoadingComponent()
     );
   }
 
