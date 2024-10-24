@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,14 +59,14 @@ public class AppointmentService {
         }
         return appointmentRepository.save(appointment);
     }
-    public void confirmAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+    public void confirmAppointment(Long appointmentId, User doctor) {
+        Appointment appointment = appointmentRepository.findByIdAndDoctor(appointmentId,doctor)
                 .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
         appointment.setStatus("Potwierdzona");
         appointmentRepository.save(appointment);
     }
 
-    public void cancelAppointment(Long appointmentId) {
+    public void cancelAppointment(Long appointmentId, User user) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
         appointment.setStatus("Anulowana");
@@ -86,7 +85,7 @@ public class AppointmentService {
         User doctor = userRepository.findByEmail(doctorEmail)
                 .orElseThrow(() -> EntityNotFoundException.doctorNotFound(doctorEmail));
         List<Appointment> appointments = appointmentRepository.findByDoctor(doctor);
-        return mapAppointmentsToDTO(appointments);
+        return mapAppointmentsDoctorToDTO(appointments);
     }
 
     // Metoda do mapowania Appointment na AppointmentDTO
@@ -99,10 +98,24 @@ public class AppointmentService {
                 appointment.getDescription(),
                 appointment.getPrice(),
                 appointment.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime(),
-                appointment.getStatus()
+                appointment.getStatus(),
+                false
         );
     }
 
+    private AppointmentDTO mapAppointmentDoctorToDTO(Appointment appointment) {
+        return new AppointmentDTO(
+                appointment.getId(),
+                appointment.getPatient().getFirstName(),
+                appointment.getPatient().getLastName(),
+                appointment.getService().getName(),
+                appointment.getDescription(),
+                appointment.getPrice(),
+                appointment.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime(),
+                appointment.getStatus(),
+                true
+        );
+    }
     // Metoda do mapowania listy Appointment na listę AppointmentDTO
     private List<AppointmentDTO> mapAppointmentsToDTO(List<Appointment> appointments) {
         return appointments.stream()
@@ -110,5 +123,22 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    private List<AppointmentDTO> mapAppointmentsDoctorToDTO(List<Appointment> appointments) {
+        return appointments.stream()
+                .map(this::mapAppointmentDoctorToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public void updateAppointmentDescription(Long appointmentId, String notes, User doctor) {
+        // Find appointment by ID
+        Appointment appointment = appointmentRepository.findByIdAndDoctor(appointmentId,doctor)
+                .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
+
+        // Update description
+        appointment.setDescription(notes);
+
+        // Save the updated appointment
+        appointmentRepository.save(appointment);
+    }
 
 }

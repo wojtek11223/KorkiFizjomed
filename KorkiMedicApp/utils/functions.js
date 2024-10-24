@@ -5,8 +5,9 @@ import { REACT_APP_API_URL } from '@env';
 
 export const loadUserInfo = async () => {
     try {
+      console.log(REACT_APP_API_URL);
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/users/me`, {
+      const response = await axios.get(`http://192.168.0.101:8005/users/me`, {
         headers: {
         'Content-Type': 'application/json',
         // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:

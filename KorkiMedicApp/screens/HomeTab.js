@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import { loadUserInfo } from '../utils/functions';
 import { useFocusEffect } from '@react-navigation/native';
 import LoadingComponent from '../compoments/LoadingComponent';
+import DoctorAppointmentsScreen from './DoctorAppointmentsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -49,7 +50,7 @@ export default function HomeTab() {
             iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Ustawienia') {
             iconName = focused ? 'settings' : 'settings-outline';
-          } else if (route.name === 'Pacjenci') {  // Nowa zakładka dla lekarza
+          } else if (route.name === 'Pacjenci') { 
             iconName = focused ? 'people' : 'people-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -75,7 +76,7 @@ export default function HomeTab() {
       {userInfo.doctor && (
         <Tab.Screen 
           name="Pacjenci" 
-          component={AppointmentsScreen} 
+          component={DoctorAppointmentsScreen} 
           options={{ title: 'Twoi Pacjenci' }}  
         />
       )}

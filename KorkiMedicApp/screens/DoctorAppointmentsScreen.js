@@ -40,7 +40,7 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
         style={styles.appointmentCard}
         onPress={() => navigation.navigate('AppointmentDetail', { appointment: item })}
       >
-        <Text style={styles.appointmentTitle}>Doctor: {item.doctorFirstName} {item.doctorLastName}</Text>
+        <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
         <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
         <Text>Rodzaj usługi: {item.serviceName}</Text>
         <Text>Opis: {item.serviceDescription}</Text>
@@ -68,12 +68,6 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
         />
       )}
 
-        <TouchableOpacity
-            style={styles.bookButton}
-            onPress={() => navigation.navigate('BookAppointment')}
-        >
-        <Text style={styles.bookButtonText}>Zarejestruj wizytę</Text>
-      </TouchableOpacity>
     </View>
   );
 };

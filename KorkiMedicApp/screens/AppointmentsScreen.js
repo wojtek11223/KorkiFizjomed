@@ -7,7 +7,6 @@ import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusE
 import LoadingComponent from '../compoments/LoadingComponent';
 
 const AppointmentsScreen = ({ navigation }) => {
-
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +17,6 @@ const AppointmentsScreen = ({ navigation }) => {
       const response = await axios.get(`${REACT_APP_API_URL}/api/appointments/patient`,{
         headers: {
         'Content-Type': 'application/json',
-        // Jeśli API wymaga autoryzacji, można dodać token w nagłówku:
         'Authorization': `Bearer ${token}`,
       }});
       setAppointments(response.data);
@@ -47,10 +45,10 @@ const AppointmentsScreen = ({ navigation }) => {
         style={styles.appointmentCard}
         onPress={() => navigation.navigate('AppointmentDetail', { appointment: item })}
       >
-        <Text style={styles.appointmentTitle}>Doctor: {item.doctorFirstName} {item.doctorLastName}</Text>
+        <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
         <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
         <Text>Rodzaj usługi: {item.serviceName}</Text>
-        <Text>Opis: {item.appointmentDescription}</Text>
+        <Text>Opis: {item.serviceDescription}</Text>
         <Text>Cena: {item.price}</Text>
         <Text>Status: {item.status}</Text>
       </TouchableOpacity>

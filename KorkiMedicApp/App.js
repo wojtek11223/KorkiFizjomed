@@ -14,6 +14,7 @@ import AppointmentsScreen from './screens/AppointmentsScreen';
 import BookAppointmentScreen from './screens/BookAppointmentScreen';
 import HomeTab from './screens/HomeTab';
 import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
+import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
 
 // Enable screens for better performance
 enableScreens();

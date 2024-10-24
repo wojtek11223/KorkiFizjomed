@@ -30,7 +30,6 @@ export default function LoginScreen({ navigation }) {
   };
 
   const validateForm = () => {
-    //console.log(REACT_APP_API_URL);
     let formErrors = {};
     if (!email) {
       formErrors.email = 'Email jest wymagany';
@@ -48,7 +47,8 @@ export default function LoginScreen({ navigation }) {
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       try {
-        const response = await axios.post(`${REACT_APP_API_URL}/auth/login`, {
+        console.log(REACT_APP_API_URL);
+        const response = await axios.post(`http://192.168.0.101:8005/auth/login`, {
           email: email,
           password: password,
         });

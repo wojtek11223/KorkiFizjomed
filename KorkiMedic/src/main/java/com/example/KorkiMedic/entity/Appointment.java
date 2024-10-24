@@ -39,7 +39,7 @@ public class Appointment {
 
     private int price=0;
 
-    private String description;
+    private String description= "";
 
     private String status;
 
