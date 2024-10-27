@@ -126,9 +126,9 @@ public class DataInitializer implements CommandLineRunner {
 
             // Creating doctors with specializations and services
             User doctor1 = new User(null, "John", "Doe", "john@example.com", "123456788", LocalDate.of(1980, 5, 15), 0,
-                    Set.of(Role.DOCTOR,Role.USER), Set.of(cardiology, neurology), Set.of(service1, service2), null, null, passwordEncoder.encode("qwerty"));
+                    Set.of(Role.DOCTOR,Role.USER), Set.of(cardiology, neurology), Set.of(service1, service2),null, null, null, passwordEncoder.encode("qwerty"));
             User doctor2 = new User(null, "Jane", "Smith", "jane.smith@example.com", "987654389", LocalDate.of(1975, 3, 25), 0,
-                    Set.of(Role.DOCTOR,Role.USER), Set.of(orthopedics), Set.of(service1, service3), null, null, passwordEncoder.encode("qwerty"));
+                    Set.of(Role.DOCTOR,Role.USER), Set.of(orthopedics), Set.of(service1, service3),null, null, null, passwordEncoder.encode("qwerty"));
 
             userRepository.saveAll(List.of(doctor1, doctor2));
 
@@ -224,9 +224,9 @@ public class DataInitializer implements CommandLineRunner {
 
                 // Dodanie nowych lekarzy ze specjalizacjami i usługami
                 User doctor3 = new User(null, "Agnieszka", "Kwiatkowska", "agnieszka.kwiatkowska@example.com", "888888888", LocalDate.of(1982, 4, 5), 0,
-                        Set.of(Role.DOCTOR,Role.USER), Set.of(dermatology), Set.of(service4), null, null, passwordEncoder.encode("haslo123"));
+                        Set.of(Role.DOCTOR,Role.USER), Set.of(dermatology), Set.of(service4),null, null, null, passwordEncoder.encode("haslo123"));
                 User doctor4 = new User(null, "Tomasz", "Lewandowski", "tomasz.lewandowski@example.com", "999999999", LocalDate.of(1978, 9, 20), 0,
-                        Set.of(Role.DOCTOR,Role.USER), Set.of(pediatrics, psychiatry), Set.of(service5), null, null, passwordEncoder.encode("haslo123"));
+                        Set.of(Role.DOCTOR,Role.USER), Set.of(pediatrics, psychiatry), Set.of(service5),null, null, null, passwordEncoder.encode("haslo123"));
 
                 userRepository.saveAll(List.of(doctor3, doctor4));
 

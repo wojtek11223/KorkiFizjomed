@@ -51,7 +51,7 @@ public class Appointment {
         createdAt = LocalDateTime.now();
         this.price=service.getPrice();
         patient.setLoyaltyPoints(patient.getLoyaltyPoints()+price);
-        this.status  = "Niepotwierdzony";
+        this.status  = "Niezatwierdzona";
     }
 
     @PreUpdate

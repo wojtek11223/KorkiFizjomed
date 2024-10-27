@@ -34,4 +34,11 @@ public class UserService {
     public User findUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    public void updateFcmToken(Long userId, String fcmToken) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        user.setFcmToken(fcmToken);
+        userRepository.save(user);
+    }
 }

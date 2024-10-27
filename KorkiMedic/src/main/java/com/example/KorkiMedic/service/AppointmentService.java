@@ -141,4 +141,10 @@ public class AppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    public void setStatusAppointment(Long id, User doctor, String status) {
+        Appointment appointment = appointmentRepository.findByIdAndDoctor(id,doctor)
+                .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
+        appointment.setStatus(status);
+        appointmentRepository.save(appointment);
+    }
 }

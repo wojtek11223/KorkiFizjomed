@@ -1,15 +1,14 @@
 package com.example.KorkiMedic.controllers;
 
+import com.example.KorkiMedic.dto.FcmTokenRequest;
 import com.example.KorkiMedic.dto.UserInfoDto;
 import com.example.KorkiMedic.entity.User;
+import com.example.KorkiMedic.service.PushNotificationService;
 import com.example.KorkiMedic.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         User currentUser = (User) authentication.getPrincipal();
-
         return ResponseEntity.ok(new UserInfoDto(
                 currentUser.getFirstName(),
                 currentUser.getLastName(),
@@ -45,5 +43,13 @@ public class UserController {
         List <User> users = userService.allUsers();
 
         return ResponseEntity.ok(users);
+    }
+
+    @PostMapping("fcm-token")
+    public ResponseEntity<String> updateFcmToken(@RequestBody FcmTokenRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        userService.updateFcmToken(currentUser.getId(), request.getFcmToken());
+        return ResponseEntity.ok("Token FCM został zaktualizowany.");
     }
 }

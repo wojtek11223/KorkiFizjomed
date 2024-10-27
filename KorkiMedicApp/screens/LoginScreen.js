@@ -14,6 +14,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { registerForPushNotificationsAsync } from '../utils/triggerNotification';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -42,6 +45,25 @@ export default function LoginScreen({ navigation }) {
     return formErrors;
   };
 
+  async function getAndSendFCMToken(expoPushToken) {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log('FCM Token:', expoPushToken);
+  
+      // Wyślij token FCM na serwer za pomocą axios
+      await axios.post(`${REACT_APP_API_URL}/api/fcm-token`, {
+        fcmToken: expoPushToken,
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }}
+      );
+      console.log('Token FCM został pomyślnie wysłany na serwer');
+    } catch (error) {
+      console.error('Błąd podczas wysyłania tokena FCM:', error);
+    }
+  }
+
   const handleLogin = async () => {
     setLoading(true);
     const formErrors = validateForm();
@@ -55,6 +77,8 @@ export default function LoginScreen({ navigation }) {
   
         if (response.status === 200) {
           await AsyncStorage.setItem('token', response.data.token);
+          //getAndSendFCMToken(expoPushToken);
+          await registerForPushNotificationsAsync();
           navigation.navigate('HomeTabs');
           setErrors({});
         } else {

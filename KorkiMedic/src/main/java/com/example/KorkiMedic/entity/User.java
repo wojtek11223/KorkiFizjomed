@@ -58,11 +58,12 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     private Set<Serv> services;
+    private String fcmToken;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     private String password;
-// Constructor for patient
     public User(
             Long id,
             String firstName,

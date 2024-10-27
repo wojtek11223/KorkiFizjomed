@@ -32,12 +32,6 @@ const BookAppointmentScreen = () => {
   const formattedToday = today.toISOString().split('T')[0];
   const currentYearMonth = formattedToday.slice(0, 7);
 
-  if (loading) {
-    return (
-      LoadingComponent()
-    );
-  }
-
   useEffect(() => {
     setSelectedTime(null);
     setSelectedDate('');

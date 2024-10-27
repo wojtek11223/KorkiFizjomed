@@ -2,6 +2,8 @@ package com.example.KorkiMedic.controllers;
 
 import com.example.KorkiMedic.dto.AppointmentDTO;
 import com.example.KorkiMedic.dto.AppointmentRequest;
+import com.example.KorkiMedic.dto.NotesDTO;
+import com.example.KorkiMedic.dto.StatusDTO;
 import com.example.KorkiMedic.entity.Appointment;
 import com.example.KorkiMedic.entity.User;
 import com.example.KorkiMedic.service.AppointmentService;
@@ -46,12 +48,13 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentDTOs);
     }
 
-    @PostMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmAppointment(@PathVariable Long id) {
+    @PostMapping("/{id}/setStatus")
+    public ResponseEntity<?> confirmAppointment(@PathVariable Long id,
+                                                @RequestBody StatusDTO statusDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User doctor = (User) authentication.getPrincipal();
-        appointmentService.confirmAppointment(id,doctor);
+        appointmentService.setStatusAppointment(id,doctor,statusDTO.getStatus());
         return ResponseEntity.ok("Wizyta została potwierdzona");
     }
 
@@ -65,11 +68,11 @@ public class AppointmentController {
     }
     @PostMapping("/{appointmentId}/add-notes")
     public ResponseEntity<String> addDoctorNotes(@PathVariable Long appointmentId,
-                                                 @RequestBody String notes) {
+                                                 @RequestBody NotesDTO notes) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User doctor = (User) authentication.getPrincipal(); // Get logged in doctor
-        appointmentService.updateAppointmentDescription(appointmentId, notes, doctor);
+        appointmentService.updateAppointmentDescription(appointmentId, notes.getNotes(), doctor);
         return ResponseEntity.ok("Notes added successfully");
     }
 }

@@ -11,7 +11,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [doctorNotes, setDoctorNotes] = useState(appointment.appointmentDescription); // New state for doctor notes/results
-
+  const defaultNote = appointment.appointmentDescription;
   const fetchUserInfo = async () => {
     const user = await loadUserInfo();
     if (user) {
@@ -43,11 +43,13 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleConfirmAppointment = async () => {
+  const handleStatusAppointment = async (status) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/confirm`, {}, {
+      await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/setStatus`, {
+        "status": status
+      }, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -55,7 +57,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       Alert.alert('Sukces', 'Wizyta została potwierdzona');
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Błąd', error.response?.data || error.message);
+      Alert.alert('Błąd2', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
       await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/add-notes`, {
-        notes: doctorNotes,
+        "notes": doctorNotes,
       }, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -90,7 +92,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
         return styles.statusConfirmed;
       case 'Anulowana':
         return styles.statusCancelled;
-      case 'Niezatwierdzona':
+      case 'Niezatwierdzona' || 'Niepotwierdzona':
       default:
         return styles.statusPending;
     }
@@ -111,20 +113,27 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
           <Button
             title="Anuluj wizytę"
             color="red"
-            onPress={handleCancelAppointment}
+            onPress={() =>{handleStatusAppointment("Anulowana")}}
             disabled={loading}
           />
         }
-        {appointment.status === 'Niezatwierdzona' && appointment.isDoctorAppointment &&
+        {appointment.status === 'Niezatwierdzona' && appointment.doctorAppointment &&
           <Button
             title="Potwierdź wizytę"
-            onPress={handleConfirmAppointment}
+            onPress={() =>{handleStatusAppointment("Potwierdzona")}}
+            disabled={loading}
+          />
+        }
+        {appointment.status === 'Potwierdzona' && appointment.doctorAppointment &&
+          <Button
+            title="Potwierdź realizacje wizyty"
+            onPress={() =>{handleStatusAppointment("Zrealizowana")}}
             disabled={loading}
           />
         }
 
         {/* Show input for doctors only */}
-        {appointment.isDoctorAppointment && (
+        {appointment.doctorAppointment && (
           <>
             <TextInput
               style={styles.input}
@@ -136,7 +145,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
             <Button
               title="Zapisz notatki"
               onPress={handleSaveDoctorNotes}
-              disabled={loading || doctorNotes.trim() === ''}
+              disabled={loading || doctorNotes.trim() === '' || defaultNote === doctorNotes}
             />
           </>
         )}
