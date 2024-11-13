@@ -1,27 +1,56 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Text, View, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import HomeScreen from './screens/HomeScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import AppointmentsScreen from './screens/AppointmentsScreen';
 import BookAppointmentScreen from './screens/BookAppointmentScreen';
 import HomeTab from './screens/HomeTab';
 import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
 import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
+import { registerForPushNotificationsAsync } from './utils/triggerNotification';
 
 // Enable screens for better performance
 enableScreens();
 
 const Stack = createNativeStackNavigator();
 
+// Ustawienie handlera powiadomień, aby wyświetlały się, gdy są otrzymane
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
 export default function App() {
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  useEffect(() => {
+    //registerForPushNotificationsAsync();
+
+    // Listener for foreground notifications
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('Notification Received!', notification);
+    });
+
+    // Listener for user's response to notifications
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification Response!', response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator

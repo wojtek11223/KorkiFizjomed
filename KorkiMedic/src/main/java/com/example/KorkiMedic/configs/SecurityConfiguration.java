@@ -37,6 +37,8 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers("/users/me")
                 .hasRole("USER")
+                .requestMatchers("/users/fcm-token")
+                .hasRole("USER")
                 .requestMatchers("/users/")
                 .hasRole("ADMIN")
                 .requestMatchers("/api/doctors/**")

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "KorkiMedicApp",
-    "slug": "KorkiMedicApp",
+    "slug": "korkifizjo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,6 +26,12 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "55595831-266e-445b-bd63-e013edf7bdee"
+      }
+    },
+    "owner": "oston"
   }
 }

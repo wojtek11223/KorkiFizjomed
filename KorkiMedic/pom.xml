@@ -179,6 +179,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.1.1</version> <!-- Sprawdź najnowszą wersję w repozytorium Maven -->
+		</dependency>
+
 
 	</dependencies>
 

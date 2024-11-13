@@ -43,7 +43,7 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
         <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
         <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
         <Text>Rodzaj usługi: {item.serviceName}</Text>
-        <Text>Opis: {item.serviceDescription}</Text>
+        <Text>Opis: {item.appointmentDescription}</Text>
         <Text>Cena: {item.price}</Text>
         <Text>Status: {item.status}</Text>
       </TouchableOpacity>
