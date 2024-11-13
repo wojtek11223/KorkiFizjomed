@@ -1,6 +1,8 @@
 package com.example.KorkiMedic.controllers;
 
+import com.example.KorkiMedic.dto.ChangePasswordDTO;
 import com.example.KorkiMedic.dto.FcmTokenRequest;
+import com.example.KorkiMedic.dto.UpdatedUserDTO;
 import com.example.KorkiMedic.dto.UserInfoDto;
 import com.example.KorkiMedic.entity.User;
 import com.example.KorkiMedic.service.PushNotificationService;
@@ -44,7 +46,20 @@ public class UserController {
 
         return ResponseEntity.ok(users);
     }
-
+    @PutMapping("updated")
+    public ResponseEntity<String> updateUserProfile(@RequestBody UpdatedUserDTO updatedUserDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        User user = userService.updateUser(currentUser, updatedUserDTO);
+        return ResponseEntity.ok("Zaktualizowano dane");
+    }
+    @PutMapping("change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        userService.changePassword(currentUser, changePasswordDTO);
+        return ResponseEntity.ok("Password changed successfully");
+    }
     @PostMapping("fcm-token")
     public ResponseEntity<String> updateFcmToken(@RequestBody FcmTokenRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

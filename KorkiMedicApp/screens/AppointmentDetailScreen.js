@@ -12,6 +12,8 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [doctorNotes, setDoctorNotes] = useState(appointment.appointmentDescription); // New state for doctor notes/results
   const defaultNote = appointment.appointmentDescription;
+  const today = new Date();
+  const appointmentDate = new Date(appointment.appointmentDateTime);
   const fetchUserInfo = async () => {
     const user = await loadUserInfo();
     if (user) {
@@ -54,10 +56,10 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
           'Authorization': `Bearer ${token}`,
         },
       });
-      Alert.alert('Sukces', 'Wizyta została potwierdzona');
+      Alert.alert('Sukces', 'Wizyta zmieniła status na' + status);
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Błąd2', error.response?.data || error.message);
+      Alert.alert('Błąd', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -101,7 +103,11 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Szczegóły wizyty</Text>
-      <Text>Doktor: {appointment.doctorFirstName} {appointment.doctorLastName}</Text>
+      {appointment.doctorAppointment ?
+        <Text>Pacjent: {appointment.firstName} {appointment.lastName}</Text> :
+        <Text>Doktor: {appointment.firstName} {appointment.lastName}</Text>
+      }
+      
       <Text>Data: {new Date(appointment.appointmentDateTime).toLocaleString()}</Text>
       <Text>Rodzaj usługi: {appointment.serviceName}</Text>
       <Text>Opis: {appointment.appointmentDescription}</Text>
@@ -117,14 +123,14 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
             disabled={loading}
           />
         }
-        {appointment.status === 'Niezatwierdzona' && appointment.doctorAppointment &&
+        {(appointment.status === 'Niezatwierdzona' || appointment.status === 'Niepotwierdzony') && appointment.doctorAppointment &&
           <Button
             title="Potwierdź wizytę"
             onPress={() =>{handleStatusAppointment("Potwierdzona")}}
             disabled={loading}
           />
         }
-        {appointment.status === 'Potwierdzona' && appointment.doctorAppointment &&
+        {appointment.status === 'Potwierdzona' && appointment.doctorAppointment && today > appointmentDate &&
           <Button
             title="Potwierdź realizacje wizyty"
             onPress={() =>{handleStatusAppointment("Zrealizowana")}}
@@ -133,7 +139,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
         }
 
         {/* Show input for doctors only */}
-        {appointment.doctorAppointment && (
+        {appointment.doctorAppointment &&  appointment.status === "Zrealizowana" &&(
           <>
             <TextInput
               style={styles.input}

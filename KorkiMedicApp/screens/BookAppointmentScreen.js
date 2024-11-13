@@ -94,6 +94,53 @@ const BookAppointmentScreen = () => {
     }
   };
 
+  
+  const fetchDoctors = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/info`,{headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }});
+      setDoctors(response.data);
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+    }
+  };
+
+  const fetchAppointments = async (doctorId) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/${doctorId}/appointments`,{headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }});
+      setAppointments(response.data.appointments);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRewards = async (service) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.get(`${REACT_APP_API_URL}/api/rewards/${service}`,{headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }});
+      setRewards(response.data);
+    } catch (error) {
+      console.error('Error fetching rewards:', error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
   const markedDates = {
     [selectedDate]: { selected: true, marked: true, selectedColor: 'blue' },
   };
@@ -131,35 +178,6 @@ const BookAppointmentScreen = () => {
     return disabledDates;
   };
 
-  const fetchDoctors = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/info`,{headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
-      setDoctors(response.data);
-    } catch (error) {
-      console.error('Error fetching doctors:', error);
-    }
-  };
-
-  const fetchAppointments = async (doctorId) => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/${doctorId}/appointments`,{headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
-      setAppointments(response.data.appointments);
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDoctorChange = (doctorId) => {
     if (doctorId) {
       fetchAppointments(doctorId);
@@ -169,20 +187,16 @@ const BookAppointmentScreen = () => {
     }
   };
   
-  const fetchRewards = async (service) => {
-    try {
-      const response = await axios.get(`${REACT_APP_API_URL}/api/rewards/${service}`);
-      setRewards(response.data);
-    } catch (error) {
-      console.error('Error fetching rewards:', error);
-    }
-  };
-  
   const handleServiceChange = (service) => {
     if(service) {
       fetchRewards(service);
       setSelectedService(service);
+      setSelectedReward(null);
     }
+  }
+
+  const handleRewardChange = (reward) => {
+    setSelectedService(reward);
   }
 
   return (
@@ -219,9 +233,9 @@ const BookAppointmentScreen = () => {
           <Picker
             selectedValue={selectedReward}
             style={styles.picker}
-            onValueChange={(itemValue) => setSelectedReward(itemValue)} // Ustawia poprawnie "null"
+            onValueChange={(itemValue) => setSelectedReward(itemValue !== 0 ? itemValue : 0)} // Ustawia poprawnie "null"
           >
-            <Picker.Item label="Brak nagrody.." value={null} />
+            <Picker.Item label="Wybierz nagrodę.." value={null} />
             {rewards.map((reward) => {
               const isAvailable = userInfo.loyaltyPoints >= reward.pointsRequired;
               return (
