@@ -20,7 +20,7 @@ public class RewardService {
     // Metoda zwracająca DTO z nagrodami na podstawie id usługi
     public List<RewardDTO> getRewardsByService(Long servId) {
         List<ServReward> servRewards = servRewardRepository.findByServ_Id(servId);
-        return servRewards.stream()
+        return  servRewards.stream()
                 .map(this::mapToRewardDTO)
                 .collect(Collectors.toList());
     }

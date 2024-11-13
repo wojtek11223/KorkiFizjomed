@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,18 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { globalStyles, datePicker, errorStyles } from './styles';
 import { REACT_APP_API_URL } from '@env';
+import { loadUserInfo } from '../utils/functions';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-export default function RegisterScreen({ navigation }) {
+export default function ProfileEditScreen ({ navigation }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setFirstLast] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [birthDate, setBirthDate] = useState(new Date());
   const [show, setShow] = useState(false);
@@ -33,7 +36,24 @@ export default function RegisterScreen({ navigation }) {
   const showDatepicker = () => {
     setShow(true);
   };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
+  const fetchProfile = async () => {
+    try {
+      const response = await loadUserInfo();
+      setFirstName(response.firstName);
+      setFirstLast(response.lastName);
+      setEmail(response.email);
+      setPhoneNumber(response.phoneNumber);
+      setBirthDate(new Date(response.dateOfBirth));
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Failed to load user data.");
+    }
+  };
   const formatDate = (date) => {
     return date.toLocaleDateString('pl-PL', {
       weekday: 'long',
@@ -42,51 +62,92 @@ export default function RegisterScreen({ navigation }) {
       day: 'numeric',
     });
   };
-
+  
   const validateForm = () => {
     let formErrors = {};
-
     if (!email) {
       formErrors.email = 'Email jest wymagany';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       formErrors.email = 'Nieprawidłowy format email';
     }
   
+    return formErrors;
+  };
+  const validatePasswordForm = () => {
+    let formErrors = {};
     if (!password) {
       formErrors.password = 'Hasło jest wymagane';
     } else if (password !== confirmPassword) {
       formErrors.confirmPassword = 'Hasła muszą się zgadzać';
+    } else if(password === oldPassword) {
+      formErrors.password = 'Nowe hasło nie może być takie samo jak stare';
     }
-  
     return formErrors;
-  };
-
+  }
   const handleSubmit = async () => {
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       // Submit form
       try {
-        const response = await axios.post(`${REACT_APP_API_URL}/auth/signup`, {
-          email: email,
-          password: password,
+        const updatedUserDTO = {
           firstName: firstName,
           lastName: lastName,
+          email: email,
           phoneNumber: phoneNumber,
           dateOfBirth: birthDate
+        };
+        const token = await AsyncStorage.getItem('token');
+  
+        await axios.put(`${REACT_APP_API_URL}/users/updated`, updatedUserDTO, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
         });
-        Alert.alert(response?.data || "ok");
-        navigation.navigate('Login');
-        } catch (error) {
-          Alert.alert('Błąd podczas rejestracji:', error.response?.data || error.message);
-        }
+        Alert.alert("Pomyślnie zaktualizowano dane osobowe");
+        await fetchProfile();
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Błąd', error.response?.data || error.message);
+      }
     } else {
       setErrors(formErrors);
     }
   };
 
+  const changePassword = async () => {
+    const formErrors = validatePasswordForm();
+    if (Object.keys(formErrors).length === 0) {
+      // Submit form
+      try {
+        const changePasswordDTO = {
+          newPassword: password,
+          oldPassword: oldPassword
+        };
+        const token = await AsyncStorage.getItem('token');
+  
+        await axios.put(`${REACT_APP_API_URL}/users/change-password`, changePasswordDTO, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        Alert.alert("Pomyślnie zmieniono hasło");
+        setOldPassword('');
+        setPassword('');
+        setConfirmPassword('');
+        await fetchProfile();
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Błąd', error.response?.data || error.message);
+      }
+    } else {
+      setErrors(formErrors);
+    }
+  };
   return (
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Zarejestruj się</Text>
+      <Text style={globalStyles.title}>Dane osobowe</Text>
       <TextInput
         style={globalStyles.input}
         placeholder="Imię"
@@ -131,9 +192,20 @@ export default function RegisterScreen({ navigation }) {
           onChange={onChange}
         />
       )}
+      <TouchableOpacity style={globalStyles.button} onPress={handleSubmit}>
+        <Text style={globalStyles.buttonText}>Potwierdź zmiany</Text>
+      </TouchableOpacity>
       <TextInput
         style={globalStyles.input}
-        placeholder="Hasło"
+        placeholder="Stare hasło"
+        secureTextEntry
+        value={oldPassword}
+        onChangeText={setOldPassword}
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={globalStyles.input}
+        placeholder="Nowe hasło"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -149,8 +221,8 @@ export default function RegisterScreen({ navigation }) {
         autoCapitalize="none"
       />
       {errors.confirmPassword && <Text style={e.errorText}>{errors.confirmPassword}</Text>}
-      <TouchableOpacity style={globalStyles.button} onPress={handleSubmit}>
-        <Text style={globalStyles.buttonText}>Zarejestruj się</Text>
+      <TouchableOpacity style={globalStyles.button} onPress={changePassword}>
+        <Text style={globalStyles.buttonText}>Zmień hasło</Text>
       </TouchableOpacity>
     </View>
   );

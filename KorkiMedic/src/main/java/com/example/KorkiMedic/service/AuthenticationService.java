@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.KorkiMedic.exceptions.EntityNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+        validatePassword(input.getPassword());
         User user = new User();
         user.setFirstName(input.getFirstName());
         user.setPhoneNumber(input.getPhoneNumber());
@@ -51,7 +53,6 @@ public class AuthenticationService {
         user.setEmail(input.getEmail());
         Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
-        roles.add(Role.ADMIN);
         user.setRoles(roles);
         return userRepository.save(user);
     }
@@ -89,6 +90,12 @@ public class AuthenticationService {
             userPointActionRepository.save(userPointAction);
 
             System.out.println("Dodano 10 punktów za codzienne logowanie użytkownikowi: " + user.getEmail());
+        }
+    }
+    public void validatePassword(String password) {
+        // Przykładowa walidacja hasła: minimum 8 znaków, jedna cyfra, jedna litera wielka
+        if (password.length() < 8) {
+            throw EntityNotFoundException.IllegalPasswordException();
         }
     }
 }

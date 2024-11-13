@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, Button } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
@@ -11,9 +10,7 @@ import HomeTab from './screens/HomeTab';
 import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
 import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
-import { registerForPushNotificationsAsync } from './utils/triggerNotification';
-
+import ProfileEditScreen from './screens/ProfileEditScreen';
 // Enable screens for better performance
 enableScreens();
 
@@ -61,6 +58,7 @@ export default function App() {
         }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="HomeTabs" component={HomeTab} />

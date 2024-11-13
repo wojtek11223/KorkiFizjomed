@@ -39,14 +39,18 @@ public class SecurityConfiguration {
                 .hasRole("USER")
                 .requestMatchers("/users/fcm-token")
                 .hasRole("USER")
+                .requestMatchers("/users/updated")
+                .hasRole("USER")
+                .requestMatchers("/users/change-password")
+                .hasRole("USER")
                 .requestMatchers("/users/")
                 .hasRole("ADMIN")
                 .requestMatchers("/api/doctors/**")
-                .permitAll()
+                .hasRole("USER")
                 .requestMatchers("/api/appointments/**")
                 .hasRole("USER")
                 .requestMatchers("/api/rewards/**")
-                .permitAll()
+                .hasRole("USER")
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -62,7 +66,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:8005"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
+        configuration.setAllowedMethods(List.of("GET","POST", "PULL"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

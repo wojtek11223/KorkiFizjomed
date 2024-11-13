@@ -174,18 +174,6 @@
 			<version>3.3.3</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.firebase</groupId>
-			<artifactId>firebase-admin</artifactId>
-			<version>9.1.1</version> <!-- Sprawdź najnowszą wersję w repozytorium Maven -->
-		</dependency>
-
-
 	</dependencies>
 
 	<build>
