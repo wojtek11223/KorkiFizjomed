@@ -47,4 +47,12 @@ public class EntityNotFoundException extends RuntimeException {
     public static EntityNotFoundException NotCorrectPasswordException() {
         return new EntityNotFoundException("Stare hasło nie jest poprawne");
     }
+
+    public static EntityNotFoundException loyalityPointsException() {
+        return new EntityNotFoundException("Masz za mało punktów do wybrania nagrody");
+    }
+
+    public static EntityNotFoundException SetStatusException() {
+        return new EntityNotFoundException("Nielegalny status");
+    }
 }

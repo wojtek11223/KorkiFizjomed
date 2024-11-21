@@ -2,7 +2,9 @@ package com.example.KorkiMedic.entity;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,6 +39,9 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
+    @Column(nullable = true)
+    private ServReward servReward;
+
     private int price=0;
 
     private String description= "";
@@ -49,8 +54,6 @@ public class Appointment {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        this.price=service.getPrice();
-        patient.setLoyaltyPoints(patient.getLoyaltyPoints()+price);
         this.status  = "Niezatwierdzona";
     }
 

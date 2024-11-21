@@ -5,4 +5,5 @@ import lombok.Getter;
 @Getter
 public class StatusDTO {
     private String status;
+    private boolean isDoctor;
 }

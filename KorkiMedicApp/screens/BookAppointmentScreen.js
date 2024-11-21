@@ -60,8 +60,8 @@ const BookAppointmentScreen = () => {
         doctorId: selectedDoctor,
         serviceName: selectedService,
         date: `${selectedDate}T${selectedTime}`,
-        description: 'Checkup appointment', 
-        rewardId: selectedReward
+        description: '', 
+        rewardId: selectedReward === "" ? null : selectedReward
       }
       try {
         setLoading(true);
@@ -194,11 +194,6 @@ const BookAppointmentScreen = () => {
       setSelectedReward(null);
     }
   }
-
-  const handleRewardChange = (reward) => {
-    setSelectedService(reward);
-  }
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Wybierz lekarza:</Text>
@@ -233,9 +228,9 @@ const BookAppointmentScreen = () => {
           <Picker
             selectedValue={selectedReward}
             style={styles.picker}
-            onValueChange={(itemValue) => setSelectedReward(itemValue !== 0 ? itemValue : 0)} // Ustawia poprawnie "null"
+            onValueChange={(itemValue) => setSelectedReward(itemValue)} // Ustawia poprawnie "null"
           >
-            <Picker.Item label="Wybierz nagrodę.." value={null} />
+            <Picker.Item label="Wybierz nagrodę.." value="0" />
             {rewards.map((reward) => {
               const isAvailable = userInfo.loyaltyPoints >= reward.pointsRequired;
               return (

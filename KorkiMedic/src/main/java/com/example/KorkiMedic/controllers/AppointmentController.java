@@ -53,9 +53,9 @@ public class AppointmentController {
                                                 @RequestBody StatusDTO statusDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User doctor = (User) authentication.getPrincipal();
-        appointmentService.setStatusAppointment(id,doctor,statusDTO.getStatus());
-        return ResponseEntity.ok("Wizyta została potwierdzona");
+        User user = (User) authentication.getPrincipal();
+        appointmentService.setStatusAppointment(id,user,statusDTO);
+        return ResponseEntity.ok("Wizyta zmieniła status");
     }
 
     @PostMapping("/{id}/cancel")
