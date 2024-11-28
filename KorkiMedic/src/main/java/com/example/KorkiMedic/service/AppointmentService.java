@@ -71,6 +71,9 @@ public class AppointmentService {
             appointment.setPrice(servReward.getServ().getPrice() - servReward.getDiscount());
             appointment.setServReward(servReward);
         }
+        else {
+            appointment.setPrice(service.getPrice());
+        }
         return appointmentRepository.save(appointment);
     }
     public void confirmAppointment(Long appointmentId, User doctor) {
@@ -162,7 +165,7 @@ public class AppointmentService {
                 !"Zrealizowana".equals(statusDTO.getStatus())) {
            throw EntityNotFoundException.SetStatusException();
         }
-        if(statusDTO.isDoctor())
+        if(statusDTO.getIsDoctor() == 1)
         {
             appointment = appointmentRepository.findByIdAndDoctor(id,user)
                     .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
@@ -179,11 +182,11 @@ public class AppointmentService {
             userService.addLoyalityPoints(appointment.getPatient(),appointment.getService().getPrice());
             userService.addLoyalityPoints(appointment.getDoctor(),appointment.getService().getPrice()/2);
         }
-        if(Objects.equals(statusDTO.getStatus(), "Anulowana"))  {
+        if(Objects.equals(statusDTO.getStatus(), "Anulowana") && appointment.getServReward() != null)  {
             userService.addLoyalityPoints(appointment.getPatient(),appointment.getServReward().getDiscount());
         }
         appointmentRepository.save(appointment);
-        pushNotificationService.sendPushNotification(appointment.getPatient().getFcmToken(),"Zmiana statusu wizyty", "Wizyta dnia " + appointment.getDate().toString() + "zmieniła status wizyty");
+        pushNotificationService.sendPushNotification(appointment.getPatient().getFcmToken(),"Zmiana statusu wizyty", "Wizyta dnia " + appointment.getDate().toString() + " zmieniła status wizyty");
 
     }
 }

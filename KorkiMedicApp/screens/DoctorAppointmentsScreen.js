@@ -7,22 +7,22 @@ import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusE
 import LoadingComponent from '../compoments/LoadingComponent';
 
 const DoctorAppointmentsScreen = ({ navigation }) => {
-
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAppointments = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/appointments/doctor`,{
+      const response = await axios.get(`${REACT_APP_API_URL}/api/appointments/doctor`, {
         headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      Alert.alert('Error', error.response?.data || error.message)
+      Alert.alert('Error', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -35,39 +35,45 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
   );
 
   const renderAppointment = ({ item }) => {
+    const statusColor = item.status === 'Confirmed' ? '#28a745' : item.status === 'Pending' ? '#ffc107' : '#dc3545';
+
     return (
       <TouchableOpacity
         style={styles.appointmentCard}
         onPress={() => navigation.navigate('AppointmentDetail', { appointment: item })}
       >
-        <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
-        <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
-        <Text>Rodzaj usługi: {item.serviceName}</Text>
-        <Text>Opis: {item.appointmentDescription}</Text>
-        <Text>Cena: {item.price}</Text>
-        <Text>Status: {item.status}</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
+          <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+            {item.status}
+          </Text>
+        </View>
+        <Text style={styles.cardDetail}>📅 Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
+        <Text style={styles.cardDetail}>💼 Rodzaj usługi: {item.serviceName}</Text>
+        <Text style={styles.cardDetail}>📝 Opis: {item.appointmentDescription}</Text>
+        <Text style={styles.cardDetail}>💲 Cena: {item.price}</Text>
       </TouchableOpacity>
     );
   };
 
   if (loading) {
-    return (
-      LoadingComponent()
-    );
+    return <LoadingComponent />;
   }
 
   return (
     <View style={styles.container}>
       {appointments.length === 0 ? (
-        <Text style={styles.noAppointmentsText}>Nie ma żadnych rejestracji aktualnie. Poczekaj na nowych pacjentów</Text>
+        <Text style={styles.noAppointmentsText}>
+          Nie ma żadnych rejestracji aktualnie. Poczekaj na nowych pacjentów.
+        </Text>
       ) : (
         <FlatList
           data={appointments}
           renderItem={renderAppointment}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
       )}
-
     </View>
   );
 };
@@ -79,52 +85,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
-    position: 'relative',  // Relative positioning for absolute button
   },
   appointmentCard: {
     backgroundColor: '#ffffff',
     padding: 20,
-    marginVertical: 8,
-    borderRadius: 10,
+    marginVertical: 10,
+    borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   appointmentTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#343a40',
+  },
+  statusBadge: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+    textTransform: 'capitalize',
+  },
+  cardDetail: {
+    fontSize: 16,
+    color: '#495057',
+    marginTop: 5,
   },
   noAppointmentsText: {
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
-    color: '#888',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Styl dla przycisku
-  bookButton: {
-    position: 'absolute',
-    bottom: 20,  // 20 px od dołu ekranu
-    left: 20,
-    right: 20,
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 30,
-    alignItems: 'center',
-  },
-  bookButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: '#6c757d',
   },
 });

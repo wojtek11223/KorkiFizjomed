@@ -39,7 +39,8 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
-    @Column(nullable = true)
+    @ManyToOne
+    @JoinColumn(name = "serv_reward_id", nullable = true)
     private ServReward servReward;
 
     private int price=0;

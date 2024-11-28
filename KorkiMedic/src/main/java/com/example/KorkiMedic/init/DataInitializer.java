@@ -145,14 +145,14 @@ public class DataInitializer implements CommandLineRunner {
 
                 Date tomorrowDate = calendar.getTime();
 
-                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate,100, "Rutynowa kontrola", "Zatwierdzona", null, null);
+                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate,null,100, "Rutynowa kontrola", "Zatwierdzona", null, null);
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 calendar.set(Calendar.HOUR, 13);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
 
                 tomorrowDate = calendar.getTime();
-                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate, 0, "Scheduled surgery", "Anulowana", null, null);
+                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate,null, 0, "Scheduled surgery", "Anulowana", null, null);
                 appointmentRepository.saveAll(List.of(appointment1, appointment2));
                 adminRole = new HashSet<>();
                 adminRole.add(Role.ADMIN);
@@ -243,14 +243,14 @@ public class DataInitializer implements CommandLineRunner {
 
                 Date futureDate = calendar.getTime();
 
-                Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
+                Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,null,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 calendar.set(Calendar.HOUR_OF_DAY, 12);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
 
                 futureDate = calendar.getTime();
-                Appointment appointment4 = new Appointment(null, patient, doctor4, service5, futureDate,200, "Terapia psychologiczna", "Anulowany" ,null, null);
+                Appointment appointment4 = new Appointment(null, patient, doctor4, service5, futureDate,null,200, "Terapia psychologiczna", "Anulowany" ,null, null);
                 appointmentRepository.saveAll(List.of(appointment3, appointment4));
             }
 

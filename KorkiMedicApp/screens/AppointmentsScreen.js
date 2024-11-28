@@ -40,38 +40,45 @@ const AppointmentsScreen = ({ navigation }) => {
     );
   }
   const renderAppointment = ({ item }) => {
+    const statusColor = item.status === 'Confirmed' ? '#28a745' : item.status === 'Pending' ? '#ffc107' : '#dc3545';
+
     return (
       <TouchableOpacity
         style={styles.appointmentCard}
         onPress={() => navigation.navigate('AppointmentDetail', { appointment: item })}
       >
-        <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
-        <Text>Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
-        <Text>Rodzaj usługi: {item.serviceName}</Text>
-        <Text>Opis: {item.serviceDescription}</Text>
-        <Text>Cena: {item.price}</Text>
-        <Text>Status: {item.status}</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
+          <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+            {item.status}
+          </Text>
+        </View>
+        <Text style={styles.cardDetail}>📅 Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
+        <Text style={styles.cardDetail}>💼 Rodzaj usługi: {item.serviceName}</Text>
+        <Text style={styles.cardDetail}>📝 Opis: {item.serviceDescription}</Text>
+        <Text style={styles.cardDetail}>💲 Cena: {item.price}</Text>
       </TouchableOpacity>
     );
   };
 
-  
   return (
     <View style={styles.container}>
       {appointments.length === 0 ? (
-        <Text style={styles.noAppointmentsText}>Nie ma żadnych rejestracji aktualnie. Umów się już teraz!</Text>
+        <Text style={styles.noAppointmentsText}>
+          Nie ma żadnych rejestracji aktualnie. Umów się już teraz!
+        </Text>
       ) : (
         <FlatList
           data={appointments}
           renderItem={renderAppointment}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingBottom: 80 }}
         />
       )}
-
-        <TouchableOpacity
-            style={styles.bookButton}
-            onPress={() => navigation.navigate('BookAppointment')}
-        >
+      <TouchableOpacity
+        style={styles.bookButton}
+        onPress={() => navigation.navigate('BookAppointment')}
+      >
         <Text style={styles.bookButtonText}>Zarejestruj wizytę</Text>
       </TouchableOpacity>
     </View>
@@ -85,48 +92,64 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
-    position: 'relative',  // Relative positioning for absolute button
   },
   appointmentCard: {
     backgroundColor: '#ffffff',
     padding: 20,
-    marginVertical: 8,
-    borderRadius: 10,
+    marginVertical: 10,
+    borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   appointmentTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#343a40',
+  },
+  statusBadge: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+    textTransform: 'capitalize',
+  },
+  cardDetail: {
+    fontSize: 16,
+    color: '#495057',
+    marginTop: 5,
   },
   noAppointmentsText: {
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
-    color: '#888',
+    color: '#6c757d',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Styl dla przycisku
   bookButton: {
     position: 'absolute',
-    bottom: 20,  // 20 px od dołu ekranu
+    bottom: 20,
     left: 20,
     right: 20,
     backgroundColor: '#007bff',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   bookButtonText: {
     color: '#fff',

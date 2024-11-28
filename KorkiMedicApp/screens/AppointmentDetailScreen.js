@@ -50,13 +50,14 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
       await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/setStatus`, {
-        "status": status
+        "status": status,
+        "isDoctor": appointment.doctorAppointment ? 1 : 0
       }, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
-      Alert.alert('Sukces', 'Wizyta zmieniła status na' + status);
+      Alert.alert('Sukces', 'Wizyta zmieniła status na ' + status);
       navigation.goBack();
     } catch (error) {
       Alert.alert('Błąd', error.response?.data || error.message);
@@ -99,104 +100,155 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
         return styles.statusPending;
     }
   };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Szczegóły wizyty</Text>
-      {appointment.doctorAppointment ?
-        <Text>Pacjent: {appointment.firstName} {appointment.lastName}</Text> :
-        <Text>Doktor: {appointment.firstName} {appointment.lastName}</Text>
-      }
-      
-      <Text>Data: {new Date(appointment.appointmentDateTime).toLocaleString()}</Text>
-      <Text>Rodzaj usługi: {appointment.serviceName}</Text>
-      <Text>Opis: {appointment.appointmentDescription}</Text>
-      <Text>Cena: {appointment.price}</Text>
-      <Text style={getStatusStyle()}>Status: {appointment.status}</Text>
-
-      <View style={styles.buttonContainer}>
-        {(appointment.status === 'Niezatwierdzona' || appointment.status === 'Potwierdzona') &&
-          <Button
-            title="Anuluj wizytę"
-            color="red"
-            onPress={() =>{handleStatusAppointment("Anulowana")}}
-            disabled={loading}
-          />
-        }
-        {(appointment.status === 'Niezatwierdzona' || appointment.status === 'Niepotwierdzony') && appointment.doctorAppointment &&
-          <Button
-            title="Potwierdź wizytę"
-            onPress={() =>{handleStatusAppointment("Potwierdzona")}}
-            disabled={loading}
-          />
-        }
-        {appointment.status === 'Potwierdzona' && appointment.doctorAppointment && today > appointmentDate &&
-          <Button
-            title="Potwierdź realizacje wizyty"
-            onPress={() =>{handleStatusAppointment("Zrealizowana")}}
-            disabled={loading}
-          />
-        }
-
-        {/* Show input for doctors only */}
-        {appointment.doctorAppointment &&  appointment.status === "Zrealizowana" &&(
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Dodaj notatki lub wyniki badań"
-              value={doctorNotes}
-              onChangeText={setDoctorNotes}
-              multiline
-            />
+  
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Szczegóły wizyty</Text>
+        
+        <View style={styles.card}>
+          <Text style={styles.label}>
+            {appointment.doctorAppointment ? 'Pacjent:' : 'Doktor:'}{' '}
+            <Text style={styles.value}>
+              {appointment.firstName} {appointment.lastName}
+            </Text>
+          </Text>
+          <Text style={styles.label}>
+            Data:{' '}
+            <Text style={styles.value}>
+              {appointmentDate.toLocaleString()}
+            </Text>
+          </Text>
+          <Text style={styles.label}>
+            Rodzaj usługi:{' '}
+            <Text style={styles.value}>
+              {appointment.serviceName}
+            </Text>
+          </Text>
+          <Text style={styles.label}>
+            Opis:{' '}
+            <Text style={styles.value}>
+              {appointment.appointmentDescription}
+            </Text>
+          </Text>
+          <Text style={styles.label}>
+            Cena:{' '}
+            <Text style={styles.value}>
+              {appointment.price} zł
+            </Text>
+          </Text>
+          <Text style={[styles.label, getStatusStyle()]}>
+            Status: {appointment.status}
+          </Text>
+        </View>
+  
+        <View style={styles.buttonContainer}>
+          {(appointment.status === 'Niezatwierdzona' || appointment.status === 'Potwierdzona') && (
             <Button
-              title="Zapisz notatki"
-              onPress={handleSaveDoctorNotes}
-              disabled={loading || doctorNotes.trim() === '' || defaultNote === doctorNotes}
+              title="Anuluj wizytę"
+              color="#dc3545"
+              onPress={() => handleStatusAppointment('Anulowana')}
+              disabled={loading}
             />
-          </>
-        )}
+          )}
+          {(appointment.status === 'Niezatwierdzona' || appointment.status === 'Niepotwierdzony') &&
+            appointment.doctorAppointment && (
+              <Button
+                title="Potwierdź wizytę"
+                color="#28a745"
+                onPress={() => handleStatusAppointment('Potwierdzona')}
+                disabled={loading}
+              />
+            )}
+          {appointment.status === 'Potwierdzona' && appointment.doctorAppointment && today > appointmentDate && (
+            <Button
+              title="Potwierdź realizację wizyty"
+              color="#007bff"
+              onPress={() => handleStatusAppointment('Zrealizowana')}
+              disabled={loading}
+            />
+          )}
+  
+          {appointment.doctorAppointment && appointment.status === 'Zrealizowana' && (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Dodaj notatki lub wyniki badań"
+                value={doctorNotes}
+                onChangeText={setDoctorNotes}
+                multiline
+              />
+              <Button
+                title="Zapisz notatki"
+                color="#6c757d"
+                onPress={handleSaveDoctorNotes}
+                disabled={loading || doctorNotes.trim() === '' || defaultNote === doctorNotes}
+              />
+            </>
+          )}
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  };
 
-export default AppointmentDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    marginTop: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginVertical: 10,
-    height: 100,
-    textAlignVertical: 'top', // ensures text starts from top
-  },
-  statusConfirmed: {
-    color: 'green',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  statusCancelled: {
-    color: 'red',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  statusPending: {
-    color: 'gray',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
+  export default AppointmentDetailScreen;
+  
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: '#f8f9fa',
+    },
+    title: {
+      fontSize: 26,
+      fontWeight: 'bold',
+      color: '#343a40',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    card: {
+      backgroundColor: '#ffffff',
+      borderRadius: 10,
+      padding: 15,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+      marginBottom: 20,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#495057',
+      marginBottom: 5,
+    },
+    value: {
+      fontWeight: '400',
+      color: '#6c757d',
+    },
+    buttonContainer: {
+      marginTop: 20,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#dee2e6',
+      padding: 10,
+      borderRadius: 5,
+      backgroundColor: '#f1f3f5',
+      marginBottom: 10,
+      height: 100,
+      textAlignVertical: 'top',
+    },
+    statusConfirmed: {
+      color: '#28a745',
+      fontWeight: 'bold',
+    },
+    statusCancelled: {
+      color: '#dc3545',
+      fontWeight: 'bold',
+    },
+    statusPending: {
+      color: '#6c757d',
+      fontWeight: 'bold',
+    },
+  });
