@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Button, Alert, StyleSheet, TextInput } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, TextInput, Linking, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
@@ -9,23 +9,34 @@ import { useFocusEffect } from '@react-navigation/native';
 const AppointmentDetailScreen = ({ route, navigation }) => {
   const { appointment } = route.params;
   const [loading, setLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const [extraInfo, setExtraInfo] = useState(null);
   const [doctorNotes, setDoctorNotes] = useState(appointment.appointmentDescription); // New state for doctor notes/results
   const defaultNote = appointment.appointmentDescription;
   const today = new Date();
   const appointmentDate = new Date(appointment.appointmentDateTime);
   const fetchUserInfo = async () => {
-    const user = await loadUserInfo();
-    if (user) {
-      setUserInfo(user);
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/info`, {
+        "isDoctor": appointment.doctorAppointment
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      setExtraInfo(response.data);
+    } catch (error) {
+      Alert.alert('Błąd', error.response?.data || error.message);
+      navigation.goBack();
+    } finally {
+      setLoading(false);
     }
-  };
+};
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchUserInfo();
-    }, [])
-  );
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   const handleCancelAppointment = async () => {
     try {
@@ -51,7 +62,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       const token = await AsyncStorage.getItem('token');
       await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/setStatus`, {
         "status": status,
-        "isDoctor": appointment.doctorAppointment ? 1 : 0
+        "isDoctor": appointment.doctorAppointment
       }, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -112,6 +123,31 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
               {appointment.firstName} {appointment.lastName}
             </Text>
           </Text>
+          {extraInfo?.specializations && <Text style={styles.label}>Specjalizacje doktora:</Text>}
+          {extraInfo?.specializations?.length > 0 ? (
+            extraInfo.specializations.map((specialization, index) => (
+              <Text key={index} style={styles.specializationText}>
+                {specialization}
+              </Text>
+            ))
+          ) : (
+            <></>
+          )}
+          <Text style={styles.label}>Numer telefonu:</Text>
+          <Text style={styles.value}>{extraInfo?.phoneNumber}</Text>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => extraInfo?.phoneNumber && Linking.openURL(`tel:${extraInfo.phoneNumber}`)}
+            >
+              <Text style={styles.buttonText}>Zadzwoń</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => extraInfo?.phoneNumber && Linking.openURL(`sms:${extraInfo.phoneNumber}`)}
+            >
+              <Text style={styles.buttonText}>Napisz SMS</Text>
+          </TouchableOpacity>
           <Text style={styles.label}>
             Data:{' '}
             <Text style={styles.value}>
@@ -125,7 +161,20 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
             </Text>
           </Text>
           <Text style={styles.label}>
-            Opis:{' '}
+            Opis usługi:{' '}
+            <Text style={styles.value}>
+              {extraInfo?.serviceDescription}
+            </Text>
+          </Text>
+          {extraInfo?.rewardName && <Text style={styles.label}>
+            Wykorzystana nagroda:{' '}
+            <Text style={styles.value}>
+              {extraInfo?.rewardName}
+            </Text>
+          </Text>
+          }
+          <Text style={styles.label}>
+            Notatka:{' '}
             <Text style={styles.value}>
               {appointment.appointmentDescription}
             </Text>
@@ -168,7 +217,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
             />
           )}
   
-          {appointment.doctorAppointment && appointment.status === 'Zrealizowana' && (
+          {appointment.doctorAppointment && (appointment.status === 'Zrealizowana' || appointment.status === 'Potwierdzona') && (
             <>
               <TextInput
                 style={styles.input}
@@ -197,6 +246,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       flex: 1,
       padding: 20,
       backgroundColor: '#f8f9fa',
+      marginVertical: 8,
     },
     title: {
       fontSize: 26,
@@ -204,6 +254,10 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       color: '#343a40',
       marginBottom: 20,
       textAlign: 'center',
+    },
+    specializationText: {
+      fontSize: 16,
+      marginVertical: 4,
     },
     card: {
       backgroundColor: '#ffffff',
@@ -251,4 +305,11 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
       color: '#6c757d',
       fontWeight: 'bold',
     },
+    button: {
+      backgroundColor: '#007AFF',
+      padding: 12,
+      borderRadius: 8,
+      marginVertical: 8,
+      alignItems: 'center',
+    }
   });

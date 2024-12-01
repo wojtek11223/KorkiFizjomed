@@ -19,7 +19,7 @@ public class AppointmentDTO {
     private String lastName;
     private String serviceName;
     private String appointmentDescription;
-    private int price;
+    private float price;
     private LocalDateTime appointmentDateTime;
     private String status;
     private boolean isDoctorAppointment;

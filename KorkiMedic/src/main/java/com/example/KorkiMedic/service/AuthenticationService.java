@@ -44,6 +44,12 @@ public class AuthenticationService {
 
     public User signup(RegisterUserDto input) {
         validatePassword(input.getPassword());
+        if(userRepository.findByEmail(input.getEmail()).isPresent()) {
+            throw EntityNotFoundException.EmailIsUsedException();
+        }
+        if(userRepository.findByPhoneNumber(input.getPhoneNumber()).isPresent()) {
+            throw EntityNotFoundException.PhoneNumberIsUsedException();
+        }
         User user = new User();
         user.setFirstName(input.getFirstName());
         user.setPhoneNumber(input.getPhoneNumber());

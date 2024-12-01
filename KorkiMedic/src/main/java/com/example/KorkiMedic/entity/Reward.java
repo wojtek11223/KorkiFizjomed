@@ -22,18 +22,18 @@ public class Reward {
 
     private String name;
     private String description;
-    private Integer pointsRequired;
 
+    private float discount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "reward", cascade = CascadeType.ALL)
     private Set<ServReward> servRewards = new HashSet<>();
 
-    public Reward(String name, String description, int pointsRequired) {
+    public Reward(String name, String description, float discount) {
         this.name = name;
         this.description = description;
-        this.pointsRequired = pointsRequired;
+        this.discount = discount;
     }
     @PrePersist
     protected void onCreate() {

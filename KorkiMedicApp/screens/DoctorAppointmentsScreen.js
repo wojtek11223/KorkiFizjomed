@@ -5,10 +5,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusEffect
 import LoadingComponent from '../compoments/LoadingComponent';
+import { Picker } from '@react-native-picker/picker';
 
 const DoctorAppointmentsScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const [statusFilter, setStatusFilter] = useState(''); // Nowy stan filtra
 
   const fetchAppointments = async () => {
     try {
@@ -20,6 +23,7 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
         },
       });
       setAppointments(response.data);
+      setFilteredAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
       Alert.alert('Error', error.response?.data || error.message);
@@ -34,8 +38,17 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
     }, [])
   );
 
+  const filterAppointmentsByStatus = (status) => {
+    setStatusFilter(status);
+    if (status === '') {
+      setFilteredAppointments(appointments);
+    } else {
+      setFilteredAppointments(appointments.filter((appt) => appt.status === status));
+    }
+  };
+
   const renderAppointment = ({ item }) => {
-    const statusColor = item.status === 'Confirmed' ? '#28a745' : item.status === 'Pending' ? '#ffc107' : '#dc3545';
+    const statusColor = item.status === 'Zrealizowana' ? '#28a745' : item.status === 'Potwierdzona' ? '#ffc107' : '#dc3545';
 
     return (
       <TouchableOpacity
@@ -62,13 +75,24 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {appointments.length === 0 ? (
+      <Picker
+        selectedValue={statusFilter}
+        style={styles.picker}
+        onValueChange={(itemValue) => filterAppointmentsByStatus(itemValue)}
+      >
+        <Picker.Item label="Wszystkie" value="" />
+        <Picker.Item label="Zrealizowana" value="Zrealizowana" />
+        <Picker.Item label="Potwierdzona" value="Potwierdzona" />
+        <Picker.Item label="Anulowana" value="Anulowana" />
+        <Picker.Item label="Niezatwierdzona" value="Niezatwierdzona" />
+      </Picker>
+      {filteredAppointments.length === 0 ? (
         <Text style={styles.noAppointmentsText}>
           Nie ma żadnych rejestracji aktualnie. Poczekaj na nowych pacjentów.
         </Text>
       ) : (
         <FlatList
-          data={appointments}
+          data={filteredAppointments}
           renderItem={renderAppointment}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 20 }}

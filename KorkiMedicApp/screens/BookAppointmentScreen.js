@@ -8,7 +8,7 @@ import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { loadUserInfo } from '../utils/functions';
 
-const BookAppointmentScreen = () => {
+const BookAppointmentScreen = ({navigation}) => {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
@@ -195,6 +195,7 @@ const BookAppointmentScreen = () => {
         setSelectedDoctor(null);
         setSelectedDate('');
         setSelectedTime(null);
+        navigation.navigate('BookAppointment');
       } catch (error) {
         Alert.alert('Error creating appointment:', error.response?.data || error.message);
       } finally {

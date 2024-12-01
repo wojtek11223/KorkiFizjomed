@@ -25,37 +25,48 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private User doctor;
 
     @ManyToOne
-    @JoinColumn(name = "service_id")
+    @JoinColumn(name = "service_id", nullable = false)
     private Serv service;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(nullable = false)
     private Date date;
 
     @ManyToOne
     @JoinColumn(name = "serv_reward_id", nullable = true)
     private ServReward servReward;
 
-    private int price=0;
+    @Column(nullable = false)
+    private float price = 0;
 
-    private String description= "";
+    @Column(length = 500)
+    private String description = "";
 
+    @Column(nullable = false)
     private String status;
 
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = true)
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        this.status  = "Niezatwierdzona";
+        this.status = "Niezatwierdzona";
+        if (this.servReward != null) {
+            int currentPoints = this.getPatient().getLoyaltyPoints();
+            this.getPatient().setLoyaltyPoints(currentPoints - servReward.getPointsRequired());
+        }
     }
 
     @PreUpdate

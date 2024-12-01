@@ -55,4 +55,8 @@ public class EntityNotFoundException extends RuntimeException {
     public static EntityNotFoundException SetStatusException() {
         return new EntityNotFoundException("Nielegalny status");
     }
+
+    public static EntityNotFoundException NotRewardException() {
+        return new EntityNotFoundException("Nie znaleziono nagrody dla wybranej usługi");
+    }
 }

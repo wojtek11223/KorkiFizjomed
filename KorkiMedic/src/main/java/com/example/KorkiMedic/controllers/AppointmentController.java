@@ -1,9 +1,6 @@
 package com.example.KorkiMedic.controllers;
 
-import com.example.KorkiMedic.dto.AppointmentDTO;
-import com.example.KorkiMedic.dto.AppointmentRequest;
-import com.example.KorkiMedic.dto.NotesDTO;
-import com.example.KorkiMedic.dto.StatusDTO;
+import com.example.KorkiMedic.dto.*;
 import com.example.KorkiMedic.entity.Appointment;
 import com.example.KorkiMedic.entity.User;
 import com.example.KorkiMedic.service.AppointmentService;
@@ -75,4 +72,16 @@ public class AppointmentController {
         appointmentService.updateAppointmentDescription(appointmentId, notes.getNotes(), doctor);
         return ResponseEntity.ok("Notes added successfully");
     }
-}
+    @PostMapping("/{appointmentId}/info")
+    public ResponseEntity<AppointmentDetailsDTO> getAppointmentInfo(
+            @PathVariable Long appointmentId,
+            @RequestBody whoCallDTO requestBody) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
+        AppointmentDetailsDTO appointmentDetailsDTO = appointmentService.getAppointmentDetails(user, requestBody.getIsDoctor(), appointmentId);
+        return ResponseEntity.ok(appointmentDetailsDTO);
+
+    }
+
+    }

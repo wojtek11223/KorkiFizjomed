@@ -11,6 +11,6 @@ public class RewardDTO {
     private Long rewardId;
     private String rewardName;
     private String description;
-    private Integer pointsRequired;
-    private Integer discount;  // Wartość zniżki powiązana z usługą
+    private float pointsRequired;
+    private float discount;  // Wartość zniżki powiązana z usługą
 }

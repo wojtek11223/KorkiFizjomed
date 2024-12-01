@@ -14,7 +14,6 @@ export async function registerForPushNotificationsAsync() {
     });
   }
 
-  let response;
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -39,9 +38,5 @@ export async function registerForPushNotificationsAsync() {
       }}
     );
     console.log('Token FCM został pomyślnie wysłany na serwer');
-  } else {
-    alert('Must use physical device for Push Notifications');
   }
-
-  return response.data;
 }

@@ -31,8 +31,8 @@ public class RewardService {
         rewardDTO.setRewardId(servReward.getId());
         rewardDTO.setRewardName(servReward.getReward().getName());
         rewardDTO.setDescription(servReward.getReward().getDescription());
-        rewardDTO.setPointsRequired(servReward.getReward().getPointsRequired());
-        rewardDTO.setDiscount(servReward.getDiscount());
+        rewardDTO.setPointsRequired(servReward.getPointsRequired());
+        rewardDTO.setDiscount(servReward.getReward().getDiscount());
         return rewardDTO;
     }
 }
