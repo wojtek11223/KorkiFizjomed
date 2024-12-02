@@ -8,14 +8,15 @@ import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { loadUserInfo } from '../utils/functions';
 
-
-const BookAppointmentScreen = () => {
+const BookAppointmentScreen = ({navigation}) => {
+  const [selectedSpecialization, setSelectedSpecialization] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date().toISOString().split('T')[0].slice(0, 7));
   const [appointments, setAppointments] = useState([]);
-  const [doctors, setDoctors] = useState([]); 
+  const [doctors, setDoctors] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [rewards, setRewards] = useState([]);
   const [userInfo, setUserInfo] = useState({});
@@ -36,7 +37,6 @@ const BookAppointmentScreen = () => {
     setSelectedTime(null);
     setSelectedDate('');
     setSelectedService(null);
-
   }, [selectedDoctor]);
 
   useEffect(() => {
@@ -46,7 +46,6 @@ const BookAppointmentScreen = () => {
     setLoading(false);
   }, []);
 
-
   const fetchUserInfo = async () => {
     const user = await loadUserInfo();
     if (user) {
@@ -54,55 +53,21 @@ const BookAppointmentScreen = () => {
     }
   };
 
-  const onConfirmAppointment = async () => {
-    if (selectedDoctor && selectedDate && selectedTime && selectedService) {
-      const appointmentData = {
-        doctorId: selectedDoctor,
-        serviceName: selectedService,
-        date: `${selectedDate}T${selectedTime}`,
-        description: 'Checkup appointment', 
-        rewardId: selectedReward
-      }
-      try {
-        setLoading(true);
-        const token = await AsyncStorage.getItem('token');
-        // Wysłanie zapytania POST do API
-        const response = await axios.post(`${REACT_APP_API_URL}/api/appointments/create`, appointmentData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        Alert.alert(
-          'Wizyta zarezerwowana',
-          `Zarezerwowałeś wizytę u ${doctors.find(doctor => doctor.id === selectedDoctor)?.firstName} ${doctors.find(doctor => doctor.id === selectedDoctor)?.lastName} na dzień ${selectedDate} o godzinie ${selectedTime}.`
-        );
-        setSelectedDoctor(null);
-        setSelectedDate('');
-        setSelectedTime(null);
-        console.log('Appointment created successfully:', response.data);
-        return response.data;
-      } catch (error) {
-        Alert.alert('Error creating appointment:', error.response?.data || error.message);
-      } 
-      finally {
-        setLoading(false);
-      }
-    }
-    else {
-      Alert.alert('Błąd', 'Proszę wybrać lekarza, datę, godzinę oraz typ konsultacji.');
-    }
-  };
-
-  
   const fetchDoctors = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/info`,{headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
-      setDoctors(response.data);
+      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/info`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      const doctorList = response.data;
+      setDoctors(doctorList);
+
+      // Extract unique specializations
+      const uniqueSpecializations = [...new Set(doctorList.flatMap(doc => doc.specializations))];
+      setSpecializations(uniqueSpecializations);
     } catch (error) {
       console.error('Error fetching doctors:', error);
     }
@@ -112,10 +77,12 @@ const BookAppointmentScreen = () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/${doctorId}/appointments`,{headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
+      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/${doctorId}/appointments`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
       setAppointments(response.data.appointments);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -128,15 +95,16 @@ const BookAppointmentScreen = () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/rewards/${service}`,{headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
+      const response = await axios.get(`${REACT_APP_API_URL}/api/rewards/${service}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
       setRewards(response.data);
     } catch (error) {
       console.error('Error fetching rewards:', error);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -156,9 +124,9 @@ const BookAppointmentScreen = () => {
 
   const getAllReservedTimesForDoctor = (date) => {
     if (!appointments) return [];
-    
-    return appointments.filter(item => item.date.split('T')[0] === date).map((item) => new Date(item.date)
-    .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
+    return appointments.filter(item => item.date.split('T')[0] === date)
+      .map((item) => new Date(item.date)
+        .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }));
   };
 
   const getDisabledDates = () => {
@@ -178,40 +146,97 @@ const BookAppointmentScreen = () => {
     return disabledDates;
   };
 
+  const handleSpecializationChange = (specialization) => {
+    setSelectedSpecialization(specialization);
+    setSelectedDoctor(null);
+    setSelectedTime(null);
+  };
+
   const handleDoctorChange = (doctorId) => {
     if (doctorId) {
       fetchAppointments(doctorId);
       setSelectedDoctor(doctorId);
+      setSelectedTime(null);
     } else {
       setAppointments([]);
     }
   };
-  
+
   const handleServiceChange = (service) => {
-    if(service) {
+    if (service) {
       fetchRewards(service);
       setSelectedService(service);
       setSelectedReward(null);
     }
-  }
+  };
 
-  const handleRewardChange = (reward) => {
-    setSelectedService(reward);
-  }
+  const onConfirmAppointment = async () => {
+    if (selectedDoctor && selectedDate && selectedTime && selectedService) {
+      const appointmentData = {
+        doctorId: selectedDoctor,
+        serviceName: selectedService,
+        date: `${selectedDate}T${selectedTime}`,
+        description: 'Brak notatki',
+        rewardId: (selectedReward === "" || selectedReward === 0) ? null : selectedReward
+      };
+      try {
+        setLoading(true);
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.post(`${REACT_APP_API_URL}/api/appointments/create`, appointmentData, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        Alert.alert(
+          'Wizyta zarezerwowana',
+          `Zarezerwowałeś wizytę u ${doctors.find(doctor => doctor.id === selectedDoctor)?.firstName} ${doctors.find(doctor => doctor.id === selectedDoctor)?.lastName} na dzień ${selectedDate} o godzinie ${selectedTime}.`
+        );
+        setSelectedDoctor(null);
+        setSelectedDate('');
+        setSelectedTime(null);
+        navigation.navigate('BookAppointment');
+      } catch (error) {
+        Alert.alert('Error creating appointment:', error.response?.data || error.message);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      Alert.alert('Błąd', 'Proszę wybrać lekarza, datę, godzinę oraz typ konsultacji.');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Wybierz lekarza:</Text>
+      <Text style={styles.title}>Wybierz specjalizację:</Text>
       <Picker
-        selectedValue={selectedDoctor}
+        selectedValue={selectedSpecialization}
         style={styles.picker}
-        onValueChange={(itemValue) => handleDoctorChange(itemValue)}
+        onValueChange={(itemValue) => handleSpecializationChange(itemValue)}
       >
-        <Picker.Item label="Wybierz lekarza..." value={null} />
-        {doctors.map((doctor) => (
-          <Picker.Item key={doctor.id} label={`${doctor.firstName} ${doctor.lastName} - ${[...doctor.specializations].join(', ')}`} value={doctor.id} />
+        <Picker.Item label="Wybierz specjalizację..." value={null} />
+        {specializations.map((spec, index) => (
+          <Picker.Item key={index} label={spec} value={spec} />
         ))}
       </Picker>
+
+      {selectedSpecialization && (
+        <>
+          <Text style={styles.title}>Wybierz lekarza:</Text>
+          <Picker
+            selectedValue={selectedDoctor}
+            style={styles.picker}
+            onValueChange={(itemValue) => handleDoctorChange(itemValue)}
+          >
+            <Picker.Item label="Wybierz lekarza..." value={null} />
+            {doctors.filter(doc => doc.specializations.includes(selectedSpecialization))
+              .map((doctor) => (
+                <Picker.Item key={doctor.id} label={`${doctor.firstName} ${doctor.lastName}`} value={doctor.id} />
+              ))}
+          </Picker>
+        </>
+      )}
+
       {selectedDoctor && doctors.find(doctor => doctor.id === selectedDoctor)?.services.length > 0 && (
         <>
           <Text style={styles.title}>Wybierz rodzaj wizyty:</Text>
@@ -229,13 +254,13 @@ const BookAppointmentScreen = () => {
       )}
       {selectedService && rewards.length > 0 && (
         <>
-          <Text style={styles.title}>Wykorzystaj punkty:</Text>
+          <Text style={styles.title}>Wybierz nagrodę za nagrodę :</Text>
           <Picker
             selectedValue={selectedReward}
             style={styles.picker}
-            onValueChange={(itemValue) => setSelectedReward(itemValue !== 0 ? itemValue : 0)} // Ustawia poprawnie "null"
+            onValueChange={(itemValue) => setSelectedReward(itemValue)}
           >
-            <Picker.Item label="Wybierz nagrodę.." value={null} />
+            <Picker.Item label="Wybierz nagrodę.." value="0" />
             {rewards.map((reward) => {
               const isAvailable = userInfo.loyaltyPoints >= reward.pointsRequired;
               return (
@@ -254,8 +279,7 @@ const BookAppointmentScreen = () => {
         </>
       )}
 
-
-      {selectedDoctor && (
+      {selectedDoctor && selectedService &&  (
         <>
           <Text style={styles.title}>Wybierz datę wizyty:</Text>
           <Calendar
@@ -298,18 +322,24 @@ const BookAppointmentScreen = () => {
                 onValueChange={(itemValue) => setSelectedTime(itemValue)}
               >
                 <Picker.Item label="Wybierz godzinę..." value={null} />
-                {allTimes.map((time, index) => {
+                 {allTimes.map((time, index) => {
                   const isReserved = getAllReservedTimesForDoctor(selectedDate).includes(time);
+                  const isToday = selectedDate === new Date().toISOString().split('T')[0]; // Sprawdzanie czy selectedDate to dzisiejsza data
+                  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                  const isPastTime = isToday && time < currentTime;
+
                   return (
                     <Picker.Item
                       key={index}
                       label={time}
                       value={time}
-                      color={isReserved ? 'gray' : 'black'}
-                      enabled={!isReserved}
+                      color={isReserved || isPastTime ? 'gray' : 'black'}
+                      enabled={!isReserved && !isPastTime}
                     />
                   );
                 })}
+
               </Picker>
             </>
           ) : null}
@@ -328,13 +358,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 18,
-    marginVertical: 10,
+    fontSize: 20,
     fontWeight: 'bold',
+    marginTop: 10,
   },
   picker: {
-    height: 50,
-    marginBottom: 20,
+    marginVertical: 10,
   },
 });
 

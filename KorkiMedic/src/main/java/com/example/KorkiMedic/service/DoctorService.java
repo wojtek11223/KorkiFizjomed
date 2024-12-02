@@ -62,20 +62,19 @@ public class DoctorService {
                 appointmentInfos
         );
     }
-    public List<DoctorInfoDTO> getAllDoctorsWithSpecializations() {
-        return userRepository.findAll().stream()
-                .filter(user -> user.getRoles().contains(Role.DOCTOR))
+    public List<DoctorInfoDTO> getAllDoctorsWithSpecializations(Long currentUserId) {
+        return userRepository.findAllByRoleAndNotCurrentUser(Role.DOCTOR,currentUserId).stream()
                 .map(user -> new DoctorInfoDTO(
                         user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
                         user.getSpecializations().stream()
-                                .map(Specialization::getName) // Assuming Specialization has a getName() method
+                                .map(Specialization::getName)
                                 .collect(Collectors.toSet()),
                         user.getServices().stream()
                                 .map(serv -> new ServiceDTO(
                                         serv.getId(),
-                                        serv.getName())) // Assuming Specialization has a getName() method
+                                        serv.getName()))
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());

@@ -11,6 +11,7 @@ import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
 import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
 import * as Notifications from 'expo-notifications';
 import ProfileEditScreen from './screens/ProfileEditScreen';
+import AppointmentsScreen from './screens/AppointmentsScreen';
 // Enable screens for better performance
 enableScreens();
 
@@ -30,7 +31,6 @@ export default function App() {
   const responseListener = useRef();
 
   useEffect(() => {
-    //registerForPushNotificationsAsync();
 
     // Listener for foreground notifications
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -64,6 +64,7 @@ export default function App() {
         <Stack.Screen name="HomeTabs" component={HomeTab} />
         <Stack.Screen name="BookAppointment" component={BookAppointmentScreen} />
         <Stack.Screen name="DoctorBookAppointment" component={DoctorAppointmentsScreen} />
+        <Stack.Screen name="Appointments" component={AppointmentsScreen} />
         <Stack.Screen name="AppointmentDetail" component={AppointmentDetailScreen} options={{ title: 'Szczegóły Wizyty' }} />
       </Stack.Navigator>
     </NavigationContainer>

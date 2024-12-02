@@ -81,4 +81,9 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public  void addLoyalityPoints(User user, int points) {
+        user.setLoyaltyPoints(user.getLoyaltyPoints()+points);
+        userRepository.save(user);
+    }
+
 }

@@ -99,26 +99,26 @@ public class DataInitializer implements CommandLineRunner {
             Reward reward1 = new Reward();
             reward1.setName("Zniżka 10%");
             reward1.setDescription("Zniżka na wybraną usługę.");
-            reward1.setPointsRequired(100);
+            reward1.setDiscount(0.1F);
 
             Reward reward2 = new Reward();
             reward2.setName("Zniżka 20%");
             reward2.setDescription("Zniżka na wybraną usługę.");
-            reward2.setPointsRequired(200);
+            reward2.setDiscount(0.2F);
 
             Reward reward3 = new Reward();
             reward3.setName("Bezpłatne badanie krwi");
             reward3.setDescription("Bezpłatne wykonanie badania krwi.");
-            reward3.setPointsRequired(300);
+            reward3.setDiscount(0.0F);
 
             rewardRepository.save(reward1);
             rewardRepository.save(reward2);
             rewardRepository.save(reward3);
 
             // Tworzenie powiązań między usługami a nagrodami z obniżką
-            ServReward servReward1 = new ServReward(service1, reward1, 10); // 10% zniżki na Konsultację Lekarską
-            ServReward servReward2 = new ServReward(service2, reward2, 20); // 20% zniżki na Badanie Krwi
-            ServReward servReward3 = new ServReward(service3, reward3, 100); // 100% zniżki (darmowe) na USG
+            ServReward servReward1 = new ServReward(service1, reward1, 10);
+            ServReward servReward2 = new ServReward(service2, reward2, 20);
+            ServReward servReward3 = new ServReward(service3, reward3, 100);
 
             servRewardRepository.save(servReward1);
             servRewardRepository.save(servReward2);
@@ -145,14 +145,14 @@ public class DataInitializer implements CommandLineRunner {
 
                 Date tomorrowDate = calendar.getTime();
 
-                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate,100, "Rutynowa kontrola", "Zatwierdzona", null, null);
+                Appointment appointment1 = new Appointment(null, patient, doctor1, service1, tomorrowDate,null,100, "Brak notatki", "Zatwierdzona", null, null);
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 calendar.set(Calendar.HOUR, 13);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
 
                 tomorrowDate = calendar.getTime();
-                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate, 0, "Scheduled surgery", "Anulowana", null, null);
+                Appointment appointment2 = new Appointment(null, patient, doctor2, service2, tomorrowDate,null, 550, "Brak notatki", "Anulowana", null, null);
                 appointmentRepository.saveAll(List.of(appointment1, appointment2));
                 adminRole = new HashSet<>();
                 adminRole.add(Role.ADMIN);
@@ -205,12 +205,12 @@ public class DataInitializer implements CommandLineRunner {
                 Reward reward4 = new Reward();
                 reward4.setName("Konsultacja dietetyczna");
                 reward4.setDescription("Bezpłatna konsultacja dietetyczna.");
-                reward4.setPointsRequired(150);
+                reward4.setDiscount(0);
 
                 Reward reward5 = new Reward();
                 reward5.setName("Bezpłatne USG");
                 reward5.setDescription("Bezpłatne wykonanie USG.");
-                reward5.setPointsRequired(400);
+                reward5.setDiscount(0);
 
                 rewardRepository.save(reward4);
                 rewardRepository.save(reward5);
@@ -243,14 +243,14 @@ public class DataInitializer implements CommandLineRunner {
 
                 Date futureDate = calendar.getTime();
 
-                Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
+                Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,null,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 calendar.set(Calendar.HOUR_OF_DAY, 12);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
 
                 futureDate = calendar.getTime();
-                Appointment appointment4 = new Appointment(null, patient, doctor4, service5, futureDate,200, "Terapia psychologiczna", "Anulowany" ,null, null);
+                Appointment appointment4 = new Appointment(null, patient, doctor4, service5, futureDate,null,200, "Terapia psychologiczna", "Anulowany" ,null, null);
                 appointmentRepository.saveAll(List.of(appointment3, appointment4));
             }
 

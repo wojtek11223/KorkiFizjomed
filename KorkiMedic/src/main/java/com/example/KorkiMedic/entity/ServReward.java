@@ -23,13 +23,13 @@ public class ServReward {
     @ManyToOne
     @JoinColumn(name = "reward_id", nullable = false)
     private Reward reward;
-
+    private Integer pointsRequired;
     // Dodatkowe pole do przechowywania obniżki ceny
-    private Integer discount; // wartość obniżki ceny w procentach lub inna jednostka
+     // wartość obniżki ceny w procentach lub inna jednostka
 
-    public ServReward(Serv serv, Reward reward, Integer discount) {
+    public ServReward(Serv serv, Reward reward, Integer pointsRequired) {
         this.serv = serv;
         this.reward = reward;
-        this.discount = discount;
+        this.pointsRequired = pointsRequired;
     }
 }

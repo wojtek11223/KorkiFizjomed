@@ -9,6 +9,8 @@ import com.example.KorkiMedic.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class DoctorController {
 
     @GetMapping("/{doctorId}/appointments")
     public ResponseEntity<?> getDoctorAppointments(@PathVariable Long doctorId) {
-        // Wyszukaj doktora po ID (w rzeczywistej aplikacji prawdopodobnie będziesz potrzebować repozytorium do tego)
+
         if (!userService.isUserDoctor(doctorId)) {
             throw EntityNotFoundException.doctorNotFound(doctorId.toString());
         }
@@ -38,7 +40,9 @@ public class DoctorController {
 
     @GetMapping("/info")
     public ResponseEntity<List<DoctorInfoDTO>> getDoctorsInfo() {
-        List<DoctorInfoDTO> doctorsInfo = doctorService.getAllDoctorsWithSpecializations();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        List<DoctorInfoDTO> doctorsInfo = doctorService.getAllDoctorsWithSpecializations(currentUser.getId());
         return ResponseEntity.ok(doctorsInfo);
     }
 }
