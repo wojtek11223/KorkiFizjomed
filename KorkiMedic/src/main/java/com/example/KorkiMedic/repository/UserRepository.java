@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
-    User findByFirstName(String name);
-    Optional<User> findByEmailOrPhoneNumber(String email, String phoneNumber);
     Optional<User> findByPhoneNumber(String phoneNumber);
 
     List<User> findAll();
@@ -23,4 +21,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role AND u.id <> :currentUserId")
     List<User> findAllByRoleAndNotCurrentUser(@Param("role") Role role, @Param("currentUserId") Long currentUserId);
 
+    Optional<User> findByIdAndRoles(Long doctorId, Role role);
 }

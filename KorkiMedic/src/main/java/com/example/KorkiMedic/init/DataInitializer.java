@@ -41,11 +41,11 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
             // Adding sample rewards
-            rewardRepository.save(new Reward("Bon Zniżkowy", "10% zniżki na następną wizytę", 50));
-            rewardRepository.save(new Reward("Bezpłatna Wizyta Kontrolna", "Bezpłatna sesja kontrolna", 100));
-            rewardRepository.save(new Reward("Pakiet Zdrowotny", "Kompleksowy pakiet badań zdrowotnych", 200));
-            rewardRepository.save(new Reward("Konsultacja Dietetyczna", "Bezpłatna konsultacja z dietetykiem", 70));
-            rewardRepository.save(new Reward("Masaż Relaksacyjny", "Bezpłatny masaż relaksacyjny", 120));
+            rewardRepository.save(new Reward("Bon Zniżkowy", "50 zł zniżki", 50));
+            rewardRepository.save(new Reward("Bezpłatna Wizyta Kontrolna", "Bezpłatna sesja kontrolna", 0));
+            rewardRepository.save(new Reward("Pakiet Zdrowotny", "Kompleksowy pakiet badań zdrowotnych", 0));
+            rewardRepository.save(new Reward("Konsultacja Dietetyczna", "Bezpłatna konsultacja z dietetykiem", 0));
+            rewardRepository.save(new Reward("Masaż Relaksacyjny", "Bezpłatny masaż relaksacyjny", 0));
 
             // Roles
             Set<Role> adminRole = new HashSet<>();
@@ -98,12 +98,12 @@ public class DataInitializer implements CommandLineRunner {
             // Tworzenie przykładowych nagród
             Reward reward1 = new Reward();
             reward1.setName("Zniżka 10%");
-            reward1.setDescription("Zniżka na wybraną usługę.");
+            reward1.setDescription("Zniżka 10% na wybraną usługę.");
             reward1.setDiscount(0.1F);
 
             Reward reward2 = new Reward();
             reward2.setName("Zniżka 20%");
-            reward2.setDescription("Zniżka na wybraną usługę.");
+            reward2.setDescription("Zniżka 20% na wybraną usługę.");
             reward2.setDiscount(0.2F);
 
             Reward reward3 = new Reward();
@@ -231,7 +231,7 @@ public class DataInitializer implements CommandLineRunner {
                 userRepository.saveAll(List.of(doctor3, doctor4));
 
                 // Tworzenie przykładowych wizyt
-                patient = userRepository.findByEmail("paulina.dabrowska@example.com").orElseThrow(() -> new RuntimeException("Użytkownik nie znaleziony"));
+                patient = userRepository.findByEmail("jan@example.com").orElseThrow(() -> new RuntimeException("Użytkownik nie znaleziony"));
 
                 calendar = Calendar.getInstance();
 
@@ -244,7 +244,7 @@ public class DataInitializer implements CommandLineRunner {
                 Date futureDate = calendar.getTime();
 
                 Appointment appointment3 = new Appointment(null, patient, doctor3, service4, futureDate,null,300, "Konsultacja dermatologiczna","Niezatwierdzony", null, null);
-                calendar.add(Calendar.DAY_OF_YEAR, 1);
+                calendar.add(Calendar.DAY_OF_YEAR, -1);
                 calendar.set(Calendar.HOUR_OF_DAY, 12);
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.SECOND, 0);
@@ -258,7 +258,8 @@ public class DataInitializer implements CommandLineRunner {
                 // Adding default point actions
                 List<PointAction> defaultActions = List.of(
                         new PointAction(null, "Za rejestrację w systemie", LocalDateTime.now(), LocalDateTime.now()),
-                        new PointAction(null,  "Za zapisanie się na wizytę", LocalDateTime.now(), LocalDateTime.now()),
+                        new PointAction(null,  "Za realizacje wizyty", LocalDateTime.now(), LocalDateTime.now()),
+                        new PointAction(null,  "Zwrot punktów", LocalDateTime.now(), LocalDateTime.now()),
                         new PointAction(null,  "Za polecenie nowego pacjenta", LocalDateTime.now(), LocalDateTime.now()),
                         new PointAction(null,  "Za wymianę punktów na nagrodę", LocalDateTime.now(), LocalDateTime.now()),
                         new PointAction(null, "Codzienne logowanie", LocalDateTime.now(), LocalDateTime.now())

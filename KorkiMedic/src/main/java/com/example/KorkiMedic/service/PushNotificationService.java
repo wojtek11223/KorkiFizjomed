@@ -18,6 +18,9 @@ public class PushNotificationService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String sendPushNotification(String expoPushToken, String title, String message) {
+        if (expoPushToken == null || expoPushToken.isEmpty()) {
+            return "";
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

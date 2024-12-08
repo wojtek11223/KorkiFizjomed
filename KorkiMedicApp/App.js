@@ -2,16 +2,20 @@ import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
+import { navigationRef } from './utils/NavigationService'; // Import NavigationService
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import BookAppointmentScreen from './screens/BookAppointmentScreen';
 import HomeTab from './screens/HomeTab';
 import DoctorAppointmentsScreen from './screens/DoctorAppointmentsScreen';
-import AppointmentDetailScreen from  './screens/AppointmentDetailScreen';
+import AppointmentDetailScreen from './screens/AppointmentDetailScreen';
 import * as Notifications from 'expo-notifications';
 import ProfileEditScreen from './screens/ProfileEditScreen';
 import AppointmentsScreen from './screens/AppointmentsScreen';
+import PointActionsScreen from './screens/PointActionsScreen';
+import ManageServicesScreen from './screens/ManageServicesScreen';
+
 // Enable screens for better performance
 enableScreens();
 
@@ -31,7 +35,6 @@ export default function App() {
   const responseListener = useRef();
 
   useEffect(() => {
-
     // Listener for foreground notifications
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       console.log('Notification Received!', notification);
@@ -49,7 +52,7 @@ export default function App() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{
@@ -66,6 +69,8 @@ export default function App() {
         <Stack.Screen name="DoctorBookAppointment" component={DoctorAppointmentsScreen} />
         <Stack.Screen name="Appointments" component={AppointmentsScreen} />
         <Stack.Screen name="AppointmentDetail" component={AppointmentDetailScreen} options={{ title: 'Szczegóły Wizyty' }} />
+        <Stack.Screen name="PointActions" component={PointActionsScreen} />
+        <Stack.Screen name="ManageServices" component={ManageServicesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

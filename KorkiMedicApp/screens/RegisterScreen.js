@@ -11,7 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { globalStyles, datePicker, errorStyles } from './styles';
 import { REACT_APP_API_URL } from '@env';
 import axios from 'axios';
-
+import apiClient from '../utils/apiClient';
 
 export default function RegisterScreen({ navigation }) {
   const [firstName, setFirstName] = useState('');
@@ -66,7 +66,7 @@ export default function RegisterScreen({ navigation }) {
     if (Object.keys(formErrors).length === 0) {
       // Submit form
       try {
-        const response = await axios.post(`${REACT_APP_API_URL}/auth/signup`, {
+        const response = await apiClient.post(`/auth/signup`, {
           email: email,
           password: password,
           firstName: firstName,
