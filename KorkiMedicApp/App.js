@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
 import { navigationRef } from './utils/NavigationService'; // Import NavigationService
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginScreen from './screens/LoginScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import RegisterScreen from './screens/RegisterScreen';
@@ -15,13 +16,13 @@ import ProfileEditScreen from './screens/ProfileEditScreen';
 import AppointmentsScreen from './screens/AppointmentsScreen';
 import PointActionsScreen from './screens/PointActionsScreen';
 import ManageServicesScreen from './screens/ManageServicesScreen';
-
+import AdDetailsScreen from './screens/AdDetailsScreen';
+import LoadingComponent from './compoments/LoadingComponent';
 // Enable screens for better performance
 enableScreens();
 
 const Stack = createNativeStackNavigator();
 
-// Ustawienie handlera powiadomień, aby wyświetlały się, gdy są otrzymane
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -33,14 +34,30 @@ Notifications.setNotificationHandler({
 export default function App() {
   const notificationListener = useRef();
   const responseListener = useRef();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listener for foreground notifications
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          // Możesz tu dodać dodatkową weryfikację tokena, np. wysłanie zapytania do API
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Failed to retrieve token:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkToken();
+
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       console.log('Notification Received!', notification);
     });
 
-    // Listener for user's response to notifications
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('Notification Response!', response);
     });
@@ -51,10 +68,14 @@ export default function App() {
     };
   }, []);
 
+  if (loading) {
+    return LoadingComponent();
+  }
+
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName={isAuthenticated ? 'HomeTabs' : 'Login'}
         screenOptions={{
           headerShown: false,
           animation: 'slide_from_right',
@@ -71,6 +92,7 @@ export default function App() {
         <Stack.Screen name="AppointmentDetail" component={AppointmentDetailScreen} options={{ title: 'Szczegóły Wizyty' }} />
         <Stack.Screen name="PointActions" component={PointActionsScreen} />
         <Stack.Screen name="ManageServices" component={ManageServicesScreen} />
+        <Stack.Screen name="AdDetails" component={AdDetailsScreen} options={{ title: 'Szczegóły Reklamy' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

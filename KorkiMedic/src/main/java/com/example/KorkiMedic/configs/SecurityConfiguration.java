@@ -55,6 +55,8 @@ public class SecurityConfiguration {
                 .hasRole("USER")
                 .requestMatchers("/api/services/**")
                 .hasRole("DOCTOR")
+                .requestMatchers("/api/ads/**")
+                .hasRole("USER")
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -1,0 +1,240 @@
+@startuml
+
+/' diagram meta data start
+config=StructureConfiguration;
+{
+  "projectClassification": {
+    "searchMode": "OpenProject", // OpenProject, AllProjects
+    "includedProjects": "",
+    "pathEndKeywords": "*.impl",
+    "isClientPath": "",
+    "isClientName": "",
+    "isTestPath": "",
+    "isTestName": "",
+    "isMappingPath": "",
+    "isMappingName": "",
+    "isDataAccessPath": "",
+    "isDataAccessName": "",
+    "isDataStructurePath": "",
+    "isDataStructureName": "",
+    "isInterfaceStructuresPath": "",
+    "isInterfaceStructuresName": "",
+    "isEntryPointPath": "",
+    "isEntryPointName": "",
+    "treatFinalFieldsAsMandatory": false
+  },
+  "graphRestriction": {
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "removeByInheritance": "", // inheritance/annotation based filtering is done in a second step
+    "removeByAnnotation": "",
+    "removeByClassPackage": "", // cleanup the graph after inheritance/annotation based filtering is done
+    "removeByClassName": "",
+    "cutMappings": false,
+    "cutEnum": true,
+    "cutTests": true,
+    "cutClient": true,
+    "cutDataAccess": false,
+    "cutInterfaceStructures": false,
+    "cutDataStructures": false,
+    "cutGetterAndSetter": true,
+    "cutConstructors": true
+  },
+  "graphTraversal": {
+    "forwardDepth": 3,
+    "backwardDepth": 3,
+    "classPackageExcludeFilter": "",
+    "classPackageIncludeFilter": "",
+    "classNameExcludeFilter": "",
+    "classNameIncludeFilter": "",
+    "methodNameExcludeFilter": "",
+    "methodNameIncludeFilter": "",
+    "hideMappings": false,
+    "hideDataStructures": false,
+    "hidePrivateMethods": true,
+    "hideInterfaceCalls": true, // indirection: implementation -> interface (is hidden) -> implementation
+    "onlyShowApplicationEntryPoints": false, // root node is included
+    "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
+  },
+  "details": {
+    "aggregation": "GroupByClass", // ByClass, GroupByClass, None
+    "showClassGenericTypes": true,
+    "showMethods": true,
+    "showMethodParameterNames": true,
+    "showMethodParameterTypes": true,
+    "showMethodReturnType": true,
+    "showPackageLevels": 2,
+    "showDetailedClassStructure": true
+  },
+  "rootClass": "com.example.KorkiMedic.controllers.AppointmentController",
+  "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
+}
+diagram meta data end '/
+
+
+
+digraph g {
+    rankdir="TB"
+    splines=polyline
+    
+
+'nodes 
+subgraph cluster_1322970774 { 
+   	label=example
+	labeljust=l
+	fillcolor="#ececec"
+	style=filled
+   
+   subgraph cluster_1135035646 { 
+   	label=KorkiMedic
+	labeljust=l
+	fillcolor="#d8d8d8"
+	style=filled
+   
+   AppointmentController1657670004[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)AppointmentController</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   appointmentService: AppointmentService [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ addDoctorNotes(appointmentId: Long, notes: NotesDTO): ResponseEntity&lt;String&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ confirmAppointment(id: Long, statusDTO: StatusDTO): ResponseEntity&lt;?&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ createAppointment(appointmentRequest: AppointmentRequest): ResponseEntity&lt;String&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getAppointmentInfo(appointmentId: Long, requestBody: whoCallDTO): ResponseEntity&lt;AppointmentDetailsDTO&gt;</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+AppointmentService415159890[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)AppointmentService</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   appointmentRepository: AppointmentRepository [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   pointActionRepository: PointActionRepository [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   pushNotificationService: PushNotificationService [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   servRewardRepository: ServRewardRepository [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   serviceRepository: ServiceRepository [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userRepository: UserRepository [1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userService: UserService [1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ cancelAppointment(appointmentId: Long, user: User)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ confirmAppointment(appointmentId: Long, doctor: User)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ createAppointment(appointmentRequest: AppointmentRequest, PatientEmail: String): Appointment</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getAppointmentDetails(user: User, isDoctor: boolean, id: Long): AppointmentDetailsDTO</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getAppointmentsByDoctor(doctorEmail: String): List&lt;AppointmentDTO&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ getAppointmentsByPatient(patientEmail: String): List&lt;AppointmentDTO&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >- mapAppointmentDoctorToDTO(appointment: Appointment): AppointmentDTO</TD></TR>
+<TR><TD ALIGN="LEFT" >- mapAppointmentToDTO(appointment: Appointment): AppointmentDTO</TD></TR>
+<TR><TD ALIGN="LEFT" >- mapAppointmentsDoctorToDTO(appointments: List&lt;Appointment&gt;): List&lt;AppointmentDTO&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >- mapAppointmentsToDTO(appointments: List&lt;Appointment&gt;): List&lt;AppointmentDTO&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ updateAppointmentDescription(appointmentId: Long, notes: String, doctor: User)</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+AuthenticationService415159890[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)AuthenticationService</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   authenticationManager: AuthenticationManager [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   passwordEncoder: PasswordEncoder [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   pointActionRepository: PointActionRepository [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userPointActionRepository: UserPointActionRepository [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userRepository: UserRepository [0..1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ addDailyLoginPoints(user: User)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ authenticate(input: LoginUserDto): User</TD></TR>
+<TR><TD ALIGN="LEFT" >+ signup(input: RegisterUserDto): User</TD></TR>
+<TR><TD ALIGN="LEFT" >+ validatePassword(password: String)</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+EntityNotFoundException1066915513[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)EntityNotFoundException</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ AppointmentNotDoctorException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ AppointmentNotFoundException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ EmailIsUsedException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ IllegalPasswordException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ NotCorrectPasswordException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ NotRewardException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ PhoneNumberIsUsedException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ SetStatusException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ dateReservedFound(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ doctorNotFound(doctorId: String): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ loyalityPointsException(): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ patientNotFound(patientId: String): EntityNotFoundException</TD></TR>
+<TR><TD ALIGN="LEFT" >+ serviceNotFound(serviceId: String): EntityNotFoundException</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+PushNotificationService415159890[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)PushNotificationService</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   restTemplate: RestTemplate [0..1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ sendPushNotification(expoPushToken: String, title: String, message: String): String</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+
+UserService415159890[
+	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
+<TR><TD ALIGN="LEFT" >(C)UserService</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >-   authenticationService: AuthenticationService [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   passwordEncoder: PasswordEncoder [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userPointActionRepository: UserPointActionRepository [0..1]</TD></TR>
+<TR><TD ALIGN="LEFT" >-   userRepository: UserRepository [0..1]</TD></TR>
+<HR/>
+<TR><TD ALIGN="LEFT" >+ addLoyalityPoints(user: User, points: int, pointAction: PointAction)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ allUsers(): List&lt;User&gt;</TD></TR>
+<TR><TD ALIGN="LEFT" >+ changePassword(user: User, changePasswordDTO: ChangePasswordDTO)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ findUserById(userId: Long): User</TD></TR>
+<TR><TD ALIGN="LEFT" >+ isUserDoctor(userId: Long): boolean</TD></TR>
+<TR><TD ALIGN="LEFT" >+ updateFcmToken(userId: Long, fcmToken: String)</TD></TR>
+<TR><TD ALIGN="LEFT" >+ updateUser(user: User, updatedUserDTO: UpdatedUserDTO): User</TD></TR>
+</TABLE>>
+	style=filled
+	margin=0
+	shape=plaintext
+	fillcolor="#FFFFFF"
+];
+} 
+} 
+
+'edges    
+AppointmentController1657670004 -> AppointmentService415159890[label="appointmentService
+[1]"];
+AppointmentService415159890 -> PushNotificationService415159890[label="pushNotificationService
+[1]"];
+AppointmentService415159890 -> UserService415159890[label="userService
+[1]"];
+UserService415159890 -> AuthenticationService415159890[label="authenticationService
+[0..1]"];
+    
+}
+@enduml
