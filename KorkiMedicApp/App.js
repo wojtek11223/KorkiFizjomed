@@ -15,6 +15,7 @@ import ProfileEditScreen from './screens/ProfileEditScreen';
 import AppointmentsScreen from './screens/AppointmentsScreen';
 import PointActionsScreen from './screens/PointActionsScreen';
 import ManageServicesScreen from './screens/ManageServicesScreen';
+import AdDetailsScreen from './screens/AdDetailsScreen';
 
 // Enable screens for better performance
 enableScreens();
@@ -71,6 +72,7 @@ export default function App() {
         <Stack.Screen name="AppointmentDetail" component={AppointmentDetailScreen} options={{ title: 'Szczegóły Wizyty' }} />
         <Stack.Screen name="PointActions" component={PointActionsScreen} />
         <Stack.Screen name="ManageServices" component={ManageServicesScreen} />
+        <Stack.Screen name="AdDetails" component={AdDetailsScreen} options={{ title: 'Szczegóły Reklamy' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
