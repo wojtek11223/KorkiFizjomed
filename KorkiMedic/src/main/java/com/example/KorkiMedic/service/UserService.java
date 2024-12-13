@@ -2,14 +2,20 @@ package com.example.KorkiMedic.service;
 
 import com.example.KorkiMedic.dto.ChangePasswordDTO;
 import com.example.KorkiMedic.dto.UpdatedUserDTO;
+import com.example.KorkiMedic.entity.PointAction;
 import com.example.KorkiMedic.entity.User;
+import com.example.KorkiMedic.entity.UserPointAction;
 import com.example.KorkiMedic.enums.Role;
 import com.example.KorkiMedic.exceptions.EntityNotFoundException;
+import com.example.KorkiMedic.repository.PointActionRepository;
+import com.example.KorkiMedic.repository.UserPointActionRepository;
 import com.example.KorkiMedic.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,11 +25,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final AuthenticationService authenticationService;
+    private final UserPointActionRepository userPointActionRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationService authenticationService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationService authenticationService, UserPointActionRepository userPointActionRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationService = authenticationService;
+        this.userPointActionRepository = userPointActionRepository;
     }
 
     public List<User> allUsers() {
@@ -81,9 +89,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public  void addLoyalityPoints(User user, int points) {
-        user.setLoyaltyPoints(user.getLoyaltyPoints()+points);
-        userRepository.save(user);
+    public  void addLoyalityPoints(User user, int points, PointAction pointAction) {
+
+        UserPointAction userPointAction= new UserPointAction(null,user,pointAction, LocalDateTime.now(),points);
+        userPointActionRepository.save(userPointAction);
     }
 
 }

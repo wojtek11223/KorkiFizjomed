@@ -63,10 +63,6 @@ public class Appointment {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         this.status = "Niezatwierdzona";
-        if (this.servReward != null) {
-            int currentPoints = this.getPatient().getLoyaltyPoints();
-            this.getPatient().setLoyaltyPoints(currentPoints - servReward.getPointsRequired());
-        }
     }
 
     @PreUpdate

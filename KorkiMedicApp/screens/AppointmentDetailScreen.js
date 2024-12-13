@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import { loadUserInfo } from '../utils/functions';
 import { useFocusEffect } from '@react-navigation/native';
+import apiClient from '../utils/apiClient';
 
 const AppointmentDetailScreen = ({ route, navigation }) => {
   const { appointment } = route.params;
@@ -17,13 +18,8 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   const fetchUserInfo = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/info`, {
+      const response = await apiClient.post(`/api/appointments/${appointment.id}/info`, {
         "isDoctor": appointment.doctorAppointment
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       setExtraInfo(response.data);
     } catch (error) {
@@ -38,35 +34,12 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
     fetchUserInfo();
   }, []);
 
-  const handleCancelAppointment = async () => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/cancel`, {}, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      Alert.alert('Sukces', 'Wizyta została anulowana');
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert('Błąd', error.response?.data || error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleStatusAppointment = async (status) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/setStatus`, {
+      await await apiClient.post(`/api/appointments/${appointment.id}/setStatus`, {
         "status": status,
         "isDoctor": appointment.doctorAppointment
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       Alert.alert('Sukces', 'Wizyta zmieniła status na ' + status);
       navigation.goBack();
@@ -81,13 +54,8 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   const handleSaveDoctorNotes = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      await axios.post(`${REACT_APP_API_URL}/api/appointments/${appointment.id}/add-notes`, {
+      await apiClient.post(`/api/appointments/${appointment.id}/add-notes`, {
         "notes": doctorNotes,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
       Alert.alert('Sukces', 'Notatki zostały zapisane');
       setDoctorNotes('');
@@ -133,6 +101,15 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
           ) : (
             <></>
           )}
+          <Text style={styles.label}>Email:</Text>
+          <Text style={styles.value}>{extraInfo?.email}</Text>
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={() => extraInfo?.phoneNumber && Linking.openURL(`mailto:${extraInfo.email}`)}
+            >
+              <Text style={styles.buttonText}>Wyślij maila</Text>
+            </TouchableOpacity>
+
           <Text style={styles.label}>Numer telefonu:</Text>
           <Text style={styles.value}>{extraInfo?.phoneNumber}</Text>
             <TouchableOpacity 
@@ -147,7 +124,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
               onPress={() => extraInfo?.phoneNumber && Linking.openURL(`sms:${extraInfo.phoneNumber}`)}
             >
               <Text style={styles.buttonText}>Napisz SMS</Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
           <Text style={styles.label}>
             Data:{' '}
             <Text style={styles.value}>

@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { registerForPushNotificationsAsync } from '../utils/triggerNotification';
+import apiClient from '../utils/apiClient';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -47,7 +48,7 @@ export default function LoginScreen({ navigation }) {
     if (Object.keys(formErrors).length === 0) {
       try {
         console.log(REACT_APP_API_URL);
-        const response = await axios.post(`http://192.168.0.101:8005/auth/login`, {
+        const response = await apiClient.post(`/auth/login`, {
           email: email,
           password: password,
         });

@@ -8,6 +8,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class AppointmentDetailsDTO {
+    private String email;
     private String serviceDescription;
     private String phoneNumber;
     private Set<String> specializations;

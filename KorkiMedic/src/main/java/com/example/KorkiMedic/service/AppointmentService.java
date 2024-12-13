@@ -5,11 +5,9 @@ import com.example.KorkiMedic.dto.AppointmentDetailsDTO;
 import com.example.KorkiMedic.dto.AppointmentRequest;
 import com.example.KorkiMedic.dto.StatusDTO;
 import com.example.KorkiMedic.entity.*;
+import com.example.KorkiMedic.enums.Role;
 import com.example.KorkiMedic.exceptions.EntityNotFoundException;
-import com.example.KorkiMedic.repository.AppointmentRepository;
-import com.example.KorkiMedic.repository.ServRewardRepository;
-import com.example.KorkiMedic.repository.UserRepository;
-import com.example.KorkiMedic.repository.ServiceRepository;
+import com.example.KorkiMedic.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +35,16 @@ public class AppointmentService {
     @Autowired
     private PushNotificationService pushNotificationService;
     @Autowired
+    private PointActionRepository pointActionRepository;
+
+    @Autowired
     private UserService userService;
 
     public Appointment createAppointment(AppointmentRequest appointmentRequest,String PatientEmail) {
         User patient = userRepository.findByEmail(PatientEmail)
                 .orElseThrow(() -> EntityNotFoundException.patientNotFound(PatientEmail));
 
-        User doctor = userRepository.findById(appointmentRequest.getDoctorId())
+        User doctor = userRepository.findByIdAndRoles(appointmentRequest.getDoctorId(), Role.DOCTOR)
                 .orElseThrow(() -> EntityNotFoundException.doctorNotFound(appointmentRequest.getDoctorId().toString()));
 
         Serv service = serviceRepository.findById(appointmentRequest.getServiceName())
@@ -68,7 +69,7 @@ public class AppointmentService {
             {
                 throw EntityNotFoundException.loyalityPointsException();
             }
-            if(servReward.getReward().getDiscount()<1)
+            if(servReward.getReward().getDiscount()>=0 && servReward.getReward().getDiscount()<1)
             {
                 appointment.setPrice(servReward.getServ().getPrice() *(1-servReward.getReward().getDiscount()));
             }
@@ -76,6 +77,7 @@ public class AppointmentService {
                 appointment.setPrice(servReward.getServ().getPrice() - servReward.getReward().getDiscount());
             }
             appointment.setServReward(servReward);
+            userService.addLoyalityPoints(appointment.getPatient(),-appointment.getServReward().getPointsRequired(),pointActionRepository.findByReason("Za wymianę punktów na nagrodę"));
         }
         else {
             appointment.setPrice(service.getPrice());
@@ -186,11 +188,11 @@ public class AppointmentService {
         }
         appointment.setStatus(statusDTO.getStatus());
         if(Objects.equals(statusDTO.getStatus(), "Zrealizowana")) {
-            userService.addLoyalityPoints(appointment.getPatient(),appointment.getService().getPrice());
-            userService.addLoyalityPoints(appointment.getDoctor(),appointment.getService().getPrice()/2);
+            userService.addLoyalityPoints(appointment.getPatient(),appointment.getService().getPrice(),pointActionRepository.findByReason("Za realizacje wizyty") );
+            userService.addLoyalityPoints(appointment.getDoctor(),appointment.getService().getPrice()/2,pointActionRepository.findByReason("Za realizacje wizyty"));
         }
         if(Objects.equals(statusDTO.getStatus(), "Anulowana") && appointment.getServReward() != null)  {
-            userService.addLoyalityPoints(appointment.getPatient(),appointment.getServReward().getPointsRequired());
+            userService.addLoyalityPoints(appointment.getPatient(),appointment.getServReward().getPointsRequired(),pointActionRepository.findByReason("Zwrot punktów"));
         }
         appointmentRepository.save(appointment);
         pushNotificationService.sendPushNotification(appointment.getPatient().getFcmToken(),"Zmiana statusu wizyty", "Wizyta dnia " + appointment.getDate().toString() + " zmieniła status wizyty");
@@ -205,28 +207,25 @@ public class AppointmentService {
                     .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
             appointmentDetailsDTO.setServiceDescription(appointment.getService().getDescription());
             appointmentDetailsDTO.setPhoneNumber(appointment.getPatient().getPhoneNumber());
+            appointmentDetailsDTO.setEmail(appointment.getPatient().getEmail());
             appointmentDetailsDTO.setSpecializations(null);
-            if(appointment.getServReward()!= null){
-                appointmentDetailsDTO.setRewardName(appointment.getServReward().getReward().getName());
-            } else {
-                appointmentDetailsDTO.setRewardName(null);
-            }
 
         } else {
             appointment = appointmentRepository.findByIdAndPatient(id,user)
                     .orElseThrow(EntityNotFoundException::AppointmentNotFoundException);
             appointmentDetailsDTO.setServiceDescription(appointment.getService().getDescription());
             appointmentDetailsDTO.setPhoneNumber(appointment.getDoctor().getPhoneNumber());
+            appointmentDetailsDTO.setEmail(appointment.getDoctor().getEmail());
             appointmentDetailsDTO.setSpecializations(
                     appointment.getDoctor().getSpecializations().stream()
                             .map(Specialization::getName)
                             .collect(Collectors.toSet())
             );
-            if(appointment.getServReward()!= null){
-                appointmentDetailsDTO.setRewardName(appointment.getServReward().getReward().getName());
-            } else {
-                appointmentDetailsDTO.setRewardName(null);
-            }
+        }
+        if(appointment.getServReward()!= null){
+            appointmentDetailsDTO.setRewardName(appointment.getServReward().getReward().getName());
+        } else {
+            appointmentDetailsDTO.setRewardName(null);
         }
         return appointmentDetailsDTO;
     }

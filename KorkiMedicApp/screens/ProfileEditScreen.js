@@ -13,6 +13,7 @@ import { REACT_APP_API_URL } from '@env';
 import { loadUserInfo } from '../utils/functions';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../utils/apiClient';
 
 
 export default function ProfileEditScreen ({ navigation }) {
@@ -98,12 +99,7 @@ export default function ProfileEditScreen ({ navigation }) {
         };
         const token = await AsyncStorage.getItem('token');
   
-        await axios.put(`${REACT_APP_API_URL}/users/updated`, updatedUserDTO, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        await apiClient.put(`/users/updated`, updatedUserDTO);
         Alert.alert("Pomyślnie zaktualizowano dane osobowe");
         await fetchProfile();
       } catch (error) {

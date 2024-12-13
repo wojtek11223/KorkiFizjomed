@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         }
 
         if (exception instanceof ExpiredJwtException) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Sesja się skończyła, proszę się wylogować i zalogować ponownie bo i tak nic nie zrobisz");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sesja się skończyła, proszę się zalogować się ponownie");
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Unknown internal server error.");

@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { loadUserInfo } from '../utils/functions';
+import apiClient from '../utils/apiClient';
 
 const BookAppointmentScreen = ({navigation}) => {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
@@ -55,13 +56,7 @@ const BookAppointmentScreen = ({navigation}) => {
 
   const fetchDoctors = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/info`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        }
-      });
+      const response = await apiClient.get(`/api/doctors/info`);
       const doctorList = response.data;
       setDoctors(doctorList);
 
@@ -76,13 +71,7 @@ const BookAppointmentScreen = ({navigation}) => {
   const fetchAppointments = async (doctorId) => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/doctors/${doctorId}/appointments`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        }
-      });
+      const response = await apiClient.get(`/api/doctors/${doctorId}/appointments`);
       setAppointments(response.data.appointments);
     } catch (error) {
       console.error('Error fetching appointments:', error);

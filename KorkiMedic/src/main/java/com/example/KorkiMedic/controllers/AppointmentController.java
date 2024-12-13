@@ -55,14 +55,6 @@ public class AppointmentController {
         return ResponseEntity.ok("Wizyta zmieniła status");
     }
 
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = (User) authentication.getPrincipal();
-        appointmentService.cancelAppointment(id, user);
-        return ResponseEntity.ok("Wizyta została anulowana");
-    }
     @PostMapping("/{appointmentId}/add-notes")
     public ResponseEntity<String> addDoctorNotes(@PathVariable Long appointmentId,
                                                  @RequestBody NotesDTO notes) {
@@ -84,4 +76,4 @@ public class AppointmentController {
 
     }
 
-    }
+}

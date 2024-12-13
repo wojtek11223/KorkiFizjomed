@@ -6,6 +6,7 @@ import { REACT_APP_API_URL } from '@env';
 import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusEffect
 import LoadingComponent from '../compoments/LoadingComponent';
 import { Picker } from '@react-native-picker/picker';
+import apiClient from '../utils/apiClient';
 
 const AppointmentsScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([]);
@@ -17,11 +18,7 @@ const AppointmentsScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${REACT_APP_API_URL}/api/appointments/patient`,{
-        headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }});
+      const response = await apiClient.get(`/api/appointments/patient`);
       setAppointments(response.data);
       setFilteredAppointments(response.data);
     } catch (error) {

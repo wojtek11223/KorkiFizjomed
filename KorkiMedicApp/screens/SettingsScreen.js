@@ -1,9 +1,30 @@
-import React from 'react';
+import React, {useState, useCallback} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { loadUserInfo } from '../utils/functions';
 
 export default function SettingsScreen({ navigation }) {
+
+  const [userInfo, setUserInfo] = useState(null);
+
+  const fetchUserInfo = async () => {
+    try {
+      const user = await loadUserInfo();  // Pobierz dane użytkownika
+      if (user) {
+        setUserInfo(user);  // Zaktualizuj stan userInfo, gdy dane zostaną pobrane
+      }
+    } catch (error) {
+      console.error("Error loading user info:", error);  // Obsługa błędów
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserInfo();  // Wywołanie funkcji fetchUserInfo
+    }, [])
+  );
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('token');
@@ -18,6 +39,9 @@ export default function SettingsScreen({ navigation }) {
   const handleEditProfile = () => {
     navigation.navigate('ProfileEdit');
   };
+  const handleViewPointActions = () => {
+    navigation.navigate('PointActions');
+  }
 
   return (
     <View style={styles.container}>
@@ -28,7 +52,16 @@ export default function SettingsScreen({ navigation }) {
         <Text style={styles.buttonText}>Edytuj Profil</Text>
       </TouchableOpacity>
 
-      {/* Logout Button */}
+      <TouchableOpacity style={styles.button} onPress={handleViewPointActions}>
+        <Text style={styles.buttonText}>Zobacz Akcje Punktowe</Text>
+      </TouchableOpacity>
+
+      {userInfo?.doctor &&
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ManageServices')}>
+          <Text style={styles.buttonText}>Ustawienia usług</Text>
+        </TouchableOpacity>
+      }
+      
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Wyloguj się</Text>
       </TouchableOpacity>
