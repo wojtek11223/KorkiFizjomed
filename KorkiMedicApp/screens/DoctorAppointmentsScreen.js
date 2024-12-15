@@ -1,21 +1,23 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { REACT_APP_API_URL } from '@env';
-import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusEffect
-import LoadingComponent from '../compoments/LoadingComponent';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from '@react-navigation/native';
+import LoadingComponent from '../compoments/LoadingComponent';
 import apiClient from '../utils/apiClient';
 
 const DoctorAppointmentsScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [statusFilter, setStatusFilter] = useState(''); // Nowy stan filtra
+  const [loading, setLoading] = useState(true);
+
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+  const [isFilterPanelVisible, setIsFilterPanelVisible] = useState(false);
 
   const fetchAppointments = async () => {
     try {
+      setLoading(true);
       const response = await apiClient.get(`/api/appointments/doctor`);
       setAppointments(response.data);
       setFilteredAppointments(response.data);
@@ -33,14 +35,34 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
     }, [])
   );
 
-  const filterAppointmentsByStatus = (status) => {
-    setStatusFilter(status);
-    if (status === '') {
-      setFilteredAppointments(appointments);
-    } else {
-      setFilteredAppointments(appointments.filter((appt) => appt.status === status));
+  const applyFilters = () => {
+    let updatedAppointments = [...appointments];
+
+    // Filtrowanie po statusie
+    if (statusFilter !== '') {
+      updatedAppointments = updatedAppointments.filter((appt) => appt.status === statusFilter);
     }
+
+    // Filtrowanie po imieniu/nazwisku
+    if (nameFilter.trim() !== '') {
+      updatedAppointments = updatedAppointments.filter((appt) =>
+        `${appt.firstName} ${appt.lastName}`.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+    }
+
+    // Sortowanie
+    if (sortBy === 'dateAsc') {
+      updatedAppointments.sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime));
+    } else if (sortBy === 'dateDesc') {
+      updatedAppointments.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime));
+    }
+
+    setFilteredAppointments(updatedAppointments);
   };
+
+  useEffect(() => {
+    applyFilters();
+  }, [statusFilter, sortBy, nameFilter, appointments]);
 
   const renderAppointment = ({ item }) => {
     const statusColor = item.status === 'Zrealizowana' ? '#28a745' : item.status === 'Potwierdzona' ? '#ffc107' : '#dc3545';
@@ -70,17 +92,49 @@ const DoctorAppointmentsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Picker
-        selectedValue={statusFilter}
-        style={styles.picker}
-        onValueChange={(itemValue) => filterAppointmentsByStatus(itemValue)}
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => setIsFilterPanelVisible(!isFilterPanelVisible)}
       >
-        <Picker.Item label="Wszystkie" value="" />
-        <Picker.Item label="Zrealizowana" value="Zrealizowana" />
-        <Picker.Item label="Potwierdzona" value="Potwierdzona" />
-        <Picker.Item label="Anulowana" value="Anulowana" />
-        <Picker.Item label="Niezatwierdzona" value="Niezatwierdzona" />
-      </Picker>
+        <Text style={styles.filterButtonText}>Filtry</Text>
+      </TouchableOpacity>
+
+      {isFilterPanelVisible && (
+        <View style={styles.filterPanel}>
+          {/* Filtrowanie po statusie */}
+          <Picker
+            selectedValue={statusFilter}
+            style={styles.picker}
+            onValueChange={(itemValue) => setStatusFilter(itemValue)}
+          >
+            <Picker.Item label="Wszystkie" value="" />
+            <Picker.Item label="Zrealizowana" value="Zrealizowana" />
+            <Picker.Item label="Potwierdzona" value="Potwierdzona" />
+            <Picker.Item label="Anulowana" value="Anulowana" />
+            <Picker.Item label="Niezatwierdzona" value="Niezatwierdzona" />
+          </Picker>
+
+          {/* Sortowanie */}
+          <Picker
+            selectedValue={sortBy}
+            style={styles.picker}
+            onValueChange={(itemValue) => setSortBy(itemValue)}
+          >
+            <Picker.Item label="Brak sortowania" value="" />
+            <Picker.Item label="Data rosnąco" value="dateAsc" />
+            <Picker.Item label="Data malejąco" value="dateDesc" />
+          </Picker>
+
+          {/* Filtrowanie po imieniu i nazwisku */}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Wyszukaj po imieniu lub nazwisku"
+            value={nameFilter}
+            onChangeText={(text) => setNameFilter(text)}
+          />
+        </View>
+      )}
+
       {filteredAppointments.length === 0 ? (
         <Text style={styles.noAppointmentsText}>
           Nie ma żadnych rejestracji aktualnie. Poczekaj na nowych pacjentów.
@@ -104,6 +158,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
+  },
+  filterButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  filterButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  filterPanel: {
+    backgroundColor: '#ffffff',
+    padding: 10,
+    borderRadius: 10,
+    paddingBottom: 35,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  picker: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginVertical: 5,
+    height: 40,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 8,
+    marginVertical: 5,
+    fontSize: 14,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    width: '100%',
   },
   appointmentCard: {
     backgroundColor: '#ffffff',
