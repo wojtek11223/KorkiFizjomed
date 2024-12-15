@@ -49,7 +49,8 @@ public class DoctorService {
         List<ServiceDTO> services = appointments.stream()
                 .map(appointment -> new ServiceDTO(
                         appointment.getService().getId(),
-                        appointment.getService().getName()))
+                        appointment.getService().getName(),
+                        appointment.getService().getPrice()))
                 .collect(Collectors.toList());
 
 
@@ -74,7 +75,8 @@ public class DoctorService {
                         user.getServices().stream()
                                 .map(serv -> new ServiceDTO(
                                         serv.getId(),
-                                        serv.getName()))
+                                        serv.getName(),
+                                        serv.getPrice()))
                                 .collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());

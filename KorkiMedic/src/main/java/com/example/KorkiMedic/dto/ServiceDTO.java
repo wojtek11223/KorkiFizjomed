@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ServiceDTO {
     private Long id;
     private String name;
+    private int price;
 }
