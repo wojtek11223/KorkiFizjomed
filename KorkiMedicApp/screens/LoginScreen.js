@@ -8,9 +8,7 @@ import {
   RefreshControl
 } from 'react-native';
 import { globalStyles, errorStyles } from './styles';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { registerForPushNotificationsAsync } from '../utils/triggerNotification';
 import apiClient from '../utils/apiClient';
@@ -47,7 +45,6 @@ export default function LoginScreen({ navigation }) {
     const formErrors = validateForm();
     if (Object.keys(formErrors).length === 0) {
       try {
-        console.log(REACT_APP_API_URL);
         const response = await apiClient.post(`/auth/login`, {
           email: email,
           password: password,

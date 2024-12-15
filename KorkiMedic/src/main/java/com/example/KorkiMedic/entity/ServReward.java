@@ -24,8 +24,6 @@ public class ServReward {
     @JoinColumn(name = "reward_id", nullable = false)
     private Reward reward;
     private Integer pointsRequired;
-    // Dodatkowe pole do przechowywania obniżki ceny
-     // wartość obniżki ceny w procentach lub inna jednostka
 
     public ServReward(Serv serv, Reward reward, Integer pointsRequired) {
         this.serv = serv;

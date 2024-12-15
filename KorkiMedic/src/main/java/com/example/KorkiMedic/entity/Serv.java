@@ -21,7 +21,7 @@ public class Serv {
 
     @Column(nullable = false, unique = true)
     private String name;
-
+    @Column(nullable = false,length = 500)
     private String description;
 
     private int price;

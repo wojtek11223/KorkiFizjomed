@@ -19,10 +19,12 @@ public class Reward {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rewardId;
-
+    @Column(nullable = false)
     private String name;
+    @Column(length = 500)
     private String description;
 
+    @Column(nullable = false)
     private float discount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
