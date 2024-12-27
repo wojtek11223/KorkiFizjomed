@@ -8,7 +8,6 @@ import {
   RefreshControl
 } from 'react-native';
 import { globalStyles, errorStyles } from './styles';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
@@ -72,7 +71,6 @@ export default function LoginScreen({ navigation }) {
     } else {
       setErrors(formErrors);
       setLoading(false);
-      Alert.alert('Błąd', error.response.data || 'Wystąpił błąd podczas logowania');
     }
   };
   

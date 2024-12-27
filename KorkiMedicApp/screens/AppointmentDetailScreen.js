@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Button, Alert, StyleSheet, TextInput, Linking, TouchableOpacity } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, TextInput, Linking, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { REACT_APP_API_URL } from '@env';
@@ -81,7 +81,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
   };
   
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Text style={styles.title}>Szczegóły wizyty</Text>
         
         <View style={styles.card}>
@@ -212,7 +212,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
             </>
           )}
         </View>
-      </View>
+      </ScrollView >
     );
   };
 
@@ -259,6 +259,7 @@ const AppointmentDetailScreen = ({ route, navigation }) => {
     },
     buttonContainer: {
       marginTop: 20,
+      marginBottom: 20
     },
     input: {
       borderWidth: 1,

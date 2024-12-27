@@ -4,7 +4,6 @@ import { REACT_APP_API_URL } from '@env';
 import { Alert } from 'react-native';
 import { navigationRef } from './NavigationService';
 
-// Tworzenie instancji Axios
 const apiClient = axios.create({
   baseURL: REACT_APP_API_URL,
   timeout: 1000000,
@@ -14,7 +13,6 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor dla żądań
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('token');
@@ -29,6 +27,7 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 apiClient.interceptors.response.use(
   (response) => {
     return response;

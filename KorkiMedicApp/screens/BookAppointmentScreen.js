@@ -8,6 +8,7 @@ import { REACT_APP_API_URL } from '@env';
 import LoadingComponent from '../compoments/LoadingComponent';
 import { loadUserInfo } from '../utils/functions';
 import apiClient from '../utils/apiClient';
+import { LocaleConfig } from 'react-native-calendars';
 
 const BookAppointmentScreen = ({navigation}) => {
   const [selectedSpecialization, setSelectedSpecialization] = useState(null);
@@ -29,6 +30,16 @@ const BookAppointmentScreen = ({navigation}) => {
     '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
     '16:00', '16:30', '17:00', '17:30', '18:00'
   ];
+
+  LocaleConfig.locales['pl'] = {
+    monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
+    monthNamesShort: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'],
+    dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
+    dayNamesShort: ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'],
+    today: 'Dzisiaj',
+  };
+  
+  LocaleConfig.defaultLocale = 'pl';
 
   const today = new Date();
   const formattedToday = today.toISOString().split('T')[0];
@@ -236,14 +247,14 @@ const BookAppointmentScreen = ({navigation}) => {
           >
             <Picker.Item label="Wybierz rodzaj wizyty..." value={null} />
             {doctors.find(doctor => doctor.id === selectedDoctor).services.map((service, index) => (
-              <Picker.Item key={index} label={service.name} value={service.id} />
+              <Picker.Item key={index} label={`${service.name} - ${service.price} zł`} value={service.id} />
             ))}
           </Picker>
         </>
       )}
       {selectedService && rewards.length > 0 && (
         <>
-          <Text style={styles.title}>Wybierz nagrodę za nagrodę :</Text>
+          <Text style={styles.title}>Wybierz nagrodę za punkty :</Text>
           <Picker
             selectedValue={selectedReward}
             style={styles.picker}
@@ -298,7 +309,7 @@ const BookAppointmentScreen = ({navigation}) => {
               textMonthFontSize: 18,
               textDayHeaderFontSize: 16,
             }}
-            firstDay={1} // Set the first day of the week to Monday
+            firstDay={1}
             monthFormat={'yyyy-MM'}
           />
 
@@ -330,12 +341,13 @@ const BookAppointmentScreen = ({navigation}) => {
                 })}
 
               </Picker>
+              {selectedTime && <Button title="Zarezerwuj wizytę" onPress={onConfirmAppointment} />}
+
             </>
           ) : null}
         </>
       )}
 
-      <Button title="Zarezerwuj wizytę" onPress={onConfirmAppointment} />
     </ScrollView>
   );
 };

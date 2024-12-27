@@ -43,9 +43,9 @@ public class UserService {
     }
 
     public boolean isUserDoctor(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<User> userOptional = userRepository.findByIdAndRoles(userId,Role.DOCTOR);
 
-        return userOptional.isPresent() && userOptional.get().getRoles().contains(Role.DOCTOR);
+        return userOptional.isPresent();
     }
 
     public User findUserById(Long userId) {

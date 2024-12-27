@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
-import axios from 'axios';
+import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { REACT_APP_API_URL } from '@env';
-import { useFocusEffect } from '@react-navigation/native'; // Importuj useFocusEffect
-import LoadingComponent from '../compoments/LoadingComponent';
 import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from '@react-navigation/native';
+import LoadingComponent from '../compoments/LoadingComponent';
 import apiClient from '../utils/apiClient';
 
 const AppointmentsScreen = ({ navigation }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [statusFilter, setStatusFilter] = useState(''); // Nowy stan filtra
+  const [statusFilter, setStatusFilter] = useState(''); // Stan filtra statusu
+  const [sortBy, setSortBy] = useState(''); // Stan sortowania
+  const [nameFilter, setNameFilter] = useState(''); // Stan filtra imienia/nazwiska
+  const [isFilterPanelVisible, setIsFilterPanelVisible] = useState(false); // Widoczność panelu filtra
 
   const fetchAppointments = async () => {
     try {
@@ -23,7 +24,7 @@ const AppointmentsScreen = ({ navigation }) => {
       setFilteredAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
-      Alert.alert('Error', error.response?.data || error.message)
+      Alert.alert('Error', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -34,20 +35,36 @@ const AppointmentsScreen = ({ navigation }) => {
       fetchAppointments();
     }, [])
   );
-  const filterAppointmentsByStatus = (status) => {
-    setStatusFilter(status);
-    if (status === '') {
-      setFilteredAppointments(appointments);
-    } else {
-      setFilteredAppointments(appointments.filter((appt) => appt.status === status));
+
+  const applyFilters = () => {
+    let updatedAppointments = [...appointments];
+
+    // Filtrowanie po statusie
+    if (statusFilter !== '') {
+      updatedAppointments = updatedAppointments.filter((appt) => appt.status === statusFilter);
     }
+
+    // Filtrowanie po imieniu/nazwisku
+    if (nameFilter.trim() !== '') {
+      updatedAppointments = updatedAppointments.filter((appt) =>
+        `${appt.firstName} ${appt.lastName}`.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+    }
+
+    // Sortowanie po dacie
+    if (sortBy === 'dateAsc') {
+      updatedAppointments.sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime));
+    } else if (sortBy === 'dateDesc') {
+      updatedAppointments.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime));
+    }
+
+    setFilteredAppointments(updatedAppointments);
   };
 
-  if (loading) {
-    return (
-      LoadingComponent()
-    );
-  }
+  useEffect(() => {
+    applyFilters();
+  }, [statusFilter, sortBy, nameFilter, appointments]);
+
   const renderAppointment = ({ item }) => {
     const statusColor = item.status === 'Zrealizowana' ? '#28a745' : item.status === 'Potwierdzona' ? '#ffc107' : '#dc3545';
 
@@ -58,9 +75,7 @@ const AppointmentsScreen = ({ navigation }) => {
       >
         <View style={styles.cardHeader}>
           <Text style={styles.appointmentTitle}>{item.firstName} {item.lastName}</Text>
-          <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-            {item.status}
-          </Text>
+          <Text style={[styles.statusBadge, { backgroundColor: statusColor }]}> {item.status} </Text>
         </View>
         <Text style={styles.cardDetail}>📅 Data: {new Date(item.appointmentDateTime).toLocaleString()}</Text>
         <Text style={styles.cardDetail}>💼 Rodzaj usługi: {item.serviceName}</Text>
@@ -70,19 +85,51 @@ const AppointmentsScreen = ({ navigation }) => {
     );
   };
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
   return (
     <View style={styles.container}>
-       <Picker
-        selectedValue={statusFilter}
-        style={styles.picker}
-        onValueChange={(itemValue) => filterAppointmentsByStatus(itemValue)}
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => setIsFilterPanelVisible(!isFilterPanelVisible)}
       >
-        <Picker.Item label="Wszystkie" value="" />
-        <Picker.Item label="Zrealizowana" value="Zrealizowana" />
-        <Picker.Item label="Potwierdzona" value="Potwierdzona" />
-        <Picker.Item label="Anulowana" value="Anulowana" />
-        <Picker.Item label="Niezatwierdzona" value="Niezatwierdzona" />
-      </Picker>
+        <Text style={styles.filterButtonText}>Filtry</Text>
+      </TouchableOpacity>
+
+      {isFilterPanelVisible && (
+        <View style={styles.filterPanel}>
+          <Picker
+            selectedValue={statusFilter}
+            style={styles.smallPicker}
+            onValueChange={(itemValue) => setStatusFilter(itemValue)}
+          >
+            <Picker.Item label="Wszystkie" value="" />
+            <Picker.Item label="Zrealizowana" value="Zrealizowana" />
+            <Picker.Item label="Potwierdzona" value="Potwierdzona" />
+            <Picker.Item label="Anulowana" value="Anulowana" />
+            <Picker.Item label="Niezatwierdzona" value="Niezatwierdzona" />
+          </Picker>
+
+          <Picker
+            selectedValue={sortBy}
+            style={styles.smallPicker}
+            onValueChange={(itemValue) => setSortBy(itemValue)}
+          >
+            <Picker.Item label="Brak sortowania" value="" />
+            <Picker.Item label="Data rosnąco" value="dateAsc" />
+            <Picker.Item label="Data malejąco" value="dateDesc" />
+          </Picker>
+
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Wyszukaj po imieniu lub nazwisku"
+            value={nameFilter}
+            onChangeText={(text) => setNameFilter(text)}
+          />
+        </View>
+      )}
 
       {filteredAppointments.length === 0 ? (
         <Text style={styles.noAppointmentsText}>
@@ -113,6 +160,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
+  },
+  filterButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  filterButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  filterPanel: {
+    backgroundColor: '#ffffff',
+    padding: 10,
+    paddingBottom: 35,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  smallPicker: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginVertical: 5,
+    height: 40,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 8,
+    marginVertical: 5,
+    fontSize: 14,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    width: '100%',
   },
   appointmentCard: {
     backgroundColor: '#ffffff',
